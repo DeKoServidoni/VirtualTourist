@@ -12,6 +12,13 @@ import CoreData
 // Class responsible to represent the current location of the user, in the map, in the core data model
 class MapInfo: NSManagedObject {
     
+    struct Keys {
+        static let Longitude = "longitude"
+        static let Latitude = "latitude"
+        static let LatitudeDelta = "latitudeDelta"
+        static let LongitudeDelta = "longitudeDelta"
+    }
+    
     @NSManaged var latitude: NSNumber
     @NSManaged var longitude: NSNumber
     @NSManaged var latitudeDelta: NSNumber
@@ -21,14 +28,18 @@ class MapInfo: NSManagedObject {
         super.init(entity: entity, insertIntoManagedObjectContext: context)
     }
     
-    init(latitude: NSNumber, longitude: NSNumber, latitudeDelta: NSNumber, longitudeDelta: NSNumber, context: NSManagedObjectContext) {
+    init(dictionary: [String : AnyObject], context: NSManagedObjectContext) {
         
         let entity = NSEntityDescription.entityForName("MapInfo", inManagedObjectContext: context)
         super.init(entity: entity!, insertIntoManagedObjectContext: context)
         
-        self.latitude = latitude
-        self.longitude = longitude
-        self.latitudeDelta = latitudeDelta
-        self.longitudeDelta = longitudeDelta
+        setValues(dictionary)
+    }
+    
+    func setValues(dictionary: [String : AnyObject]) {
+        self.latitude = dictionary[Keys.Latitude] as! NSNumber
+        self.longitude = dictionary[Keys.Longitude] as! NSNumber
+        self.latitudeDelta = dictionary[Keys.LatitudeDelta] as! NSNumber
+        self.longitudeDelta = dictionary[Keys.LongitudeDelta] as! NSNumber
     }
 }
