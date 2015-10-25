@@ -2,7 +2,7 @@
 //  AppDelegate.swift
 //  VirtualTourist
 //
-//  Created by DeKo Servidoni on 10/24/15.
+//  Created by André Servidoni on 10/24/15.
 //  Copyright © 2015 Udacity. All rights reserved.
 //
 
