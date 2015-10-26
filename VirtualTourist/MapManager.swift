@@ -13,7 +13,7 @@ import CoreData
 // Protocol responsible to comunicate with the caller of this manager
 //
 protocol MapManagerDelegate {
-    func pinInserted()
+    func pinInserted(annotation: MKPointAnnotation)
     func operationFinishedWithError(andMessage message: String)
 }
 
@@ -37,7 +37,7 @@ class MapManager: NSObject, MKMapViewDelegate {
         
         // set the long press on the map
         let longPress = UILongPressGestureRecognizer(target: self, action: "handleLongPressGesture:")
-        longPress.minimumPressDuration = 2.0;
+        longPress.minimumPressDuration = 1.0;
         
         self.mapView.addGestureRecognizer(longPress)
     }
@@ -53,8 +53,27 @@ class MapManager: NSObject, MKMapViewDelegate {
         }
     }
     
+    // handle the tap and holding action to place the pin
     func handleLongPressGesture(sender: UIGestureRecognizer) {
-        print("LONG PRESS")
+        
+        if sender.state == UIGestureRecognizerState.Began {
+            
+            // convert the touch location to point
+            let touchPoint = sender.locationInView(mapView)
+            let coordinate = mapView.convertPoint(touchPoint, toCoordinateFromView: mapView)
+            
+            // create the annotation and set its coordiate
+            let annotation = MKPointAnnotation()
+            annotation.coordinate = coordinate
+            annotation.title = "Delete this Pin?"
+            
+            // add the pin on the map
+            mapView.addAnnotation(annotation)
+            
+            // send this annotation to the view controller to be processed
+            //delegate?.pinInserted(annotation)
+            print("ADD PIN")
+        }
     }
     
     // MARK: Private functions
@@ -129,5 +148,36 @@ class MapManager: NSObject, MKMapViewDelegate {
     func mapView(mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
         saveRegion()
     }
-
+    
+    func mapView(mapView: MKMapView, annotationView view: MKAnnotationView, didChangeDragState newState: MKAnnotationViewDragState, fromOldState oldState: MKAnnotationViewDragState) {
+        
+        // update the pin when the drag is cancelled or ended
+        if newState == MKAnnotationViewDragState.Ending || newState == MKAnnotationViewDragState.Canceling {
+            print("UPDATE PIN!")
+        }
+    }
+    
+    func mapView(mapView: MKMapView, viewForAnnotation annotation: MKAnnotation) -> MKAnnotationView? {
+        
+        // recycle the pin on the map
+        var pinView = mapView.dequeueReusableAnnotationViewWithIdentifier("MapPin") as? MKPinAnnotationView
+        
+        if pinView == nil {
+            pinView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: "MapPin")
+            pinView!.canShowCallout = true
+            pinView!.pinTintColor =  UIColor.orangeColor()
+            pinView!.rightCalloutAccessoryView = UIButton(type: .DetailDisclosure)
+        }
+        else {
+            pinView!.annotation = annotation
+        }
+        
+        pinView?.draggable = true
+        return pinView
+    }
+    
+    func mapView(mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
+        // delete pin when the annotation is clicked
+        print("REMOVE PIN!")
+    }
 }

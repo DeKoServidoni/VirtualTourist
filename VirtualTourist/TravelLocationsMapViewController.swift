@@ -82,7 +82,7 @@ class TravelLocationsMapViewController: UIViewController, MapManagerDelegate, NS
     
     // MARK: Map manager delegate
     
-    func pinInserted() {
+    func pinInserted(annotation: MKPointAnnotation) {
         //TODO
     }
     
