@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3F56D1651BDDB9C40079906F /* MapManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F56D1641BDDB9C40079906F /* MapManager.swift */; settings = {ASSET_TAGS = (); }; };
 		3F6003E81BDC801E009A3E21 /* Pin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F6003E71BDC801E009A3E21 /* Pin.swift */; settings = {ASSET_TAGS = (); }; };
 		3F6003EA1BDC80BB009A3E21 /* Photo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F6003E91BDC80BB009A3E21 /* Photo.swift */; settings = {ASSET_TAGS = (); }; };
 		3F6003EC1BDC8307009A3E21 /* MapInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F6003EB1BDC8307009A3E21 /* MapInfo.swift */; settings = {ASSET_TAGS = (); }; };
@@ -21,6 +22,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		3F56D1641BDDB9C40079906F /* MapManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapManager.swift; sourceTree = "<group>"; };
 		3F6003E71BDC801E009A3E21 /* Pin.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Pin.swift; sourceTree = "<group>"; };
 		3F6003E91BDC80BB009A3E21 /* Photo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Photo.swift; sourceTree = "<group>"; };
 		3F6003EB1BDC8307009A3E21 /* MapInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapInfo.swift; sourceTree = "<group>"; };
@@ -48,6 +50,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		3F56D1631BDDB9930079906F /* Managers */ = {
+			isa = PBXGroup;
+			children = (
+				3F56D1641BDDB9C40079906F /* MapManager.swift */,
+			);
+			name = Managers;
+			sourceTree = "<group>";
+		};
 		3F6003E51BDC7CC4009A3E21 /* Core Data */ = {
 			isa = PBXGroup;
 			children = (
@@ -57,14 +67,14 @@
 			name = "Core Data";
 			sourceTree = "<group>";
 		};
-		3F6003E61BDC7CF2009A3E21 /* Model */ = {
+		3F6003E61BDC7CF2009A3E21 /* Models */ = {
 			isa = PBXGroup;
 			children = (
 				3F6003E71BDC801E009A3E21 /* Pin.swift */,
 				3F6003E91BDC80BB009A3E21 /* Photo.swift */,
 				3F6003EB1BDC8307009A3E21 /* MapInfo.swift */,
 			);
-			name = Model;
+			name = Models;
 			sourceTree = "<group>";
 		};
 		3FDEA6541BDB2BCD00388930 = {
@@ -87,9 +97,10 @@
 		3FDEA65F1BDB2BCD00388930 /* VirtualTourist */ = {
 			isa = PBXGroup;
 			children = (
-				3F6003E61BDC7CF2009A3E21 /* Model */,
-				3F6003E51BDC7CC4009A3E21 /* Core Data */,
 				3FDEA6601BDB2BCD00388930 /* AppDelegate.swift */,
+				3F6003E51BDC7CC4009A3E21 /* Core Data */,
+				3F6003E61BDC7CF2009A3E21 /* Models */,
+				3F56D1631BDDB9930079906F /* Managers */,
 				3F6003F41BDC8A08009A3E21 /* TravelLocationsMapViewController.swift */,
 				3FDEA6641BDB2BCD00388930 /* Main.storyboard */,
 				3FDEA6671BDB2BCD00388930 /* Assets.xcassets */,
@@ -178,6 +189,7 @@
 				3F6003EF1BDC83C8009A3E21 /* VirtualTouristModel.xcdatamodeld in Sources */,
 				3F6003EA1BDC80BB009A3E21 /* Photo.swift in Sources */,
 				3F6003E81BDC801E009A3E21 /* Pin.swift in Sources */,
+				3F56D1651BDDB9C40079906F /* MapManager.swift in Sources */,
 				3F6003F11BDC8522009A3E21 /* CoreDataStackManager.swift in Sources */,
 				3FDEA6611BDB2BCD00388930 /* AppDelegate.swift in Sources */,
 				3F6003EC1BDC8307009A3E21 /* MapInfo.swift in Sources */,

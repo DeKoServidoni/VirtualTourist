@@ -11,11 +11,11 @@ import UIKit
 import MapKit
 import CoreData
 
-class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSFetchedResultsControllerDelegate {
+class TravelLocationsMapViewController: UIViewController, MapManagerDelegate, NSFetchedResultsControllerDelegate {
     
     @IBOutlet weak var mapView: MKMapView!
     
-    var mapInfo: MapInfo!
+    var mapManager: MapManager!
     var pins: [Pin]!
     
     // MARK: Application lifecycle
@@ -24,7 +24,11 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
         super.viewDidLoad()
         
         // load map information (zoom and center)
-        //TODO
+        mapManager = MapManager(mapView: mapView, sharedContext: sharedContext, delegate: self)
+        mapManager.prepareMap()
+        
+        // set map delegate
+        mapView.delegate = mapManager
         
         // load saved pins
         do {
@@ -36,7 +40,7 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
         fetchedResultsController.delegate = self
     }
     
-    // MARK: Core data
+    // MARK: Core data functions
     
     lazy var sharedContext: NSManagedObjectContext = {
        return CoreDataStackManager.sharedInstance().managedObjectContext
@@ -54,51 +58,6 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
         return fetchedResultsController
         
     }()
-    
-    // MARK: Private functions
-    
-    // Save the context and handle the error if it occurrs
-    private func saveContextInCoreData() {
-        
-        do {
-            try CoreDataStackManager.sharedInstance().saveContext()
-        } catch {
-            showErrorAlert("Failed to save the current position.")
-        }
-    }
-    
-    // Save the region of the map every time it's update
-    private func saveRegion() {
-        
-        let positionDictionary = [
-            MapInfo.Keys.Latitude : mapView.region.center.latitude,
-            MapInfo.Keys.Longitude : mapView.region.center.longitude,
-            MapInfo.Keys.LatitudeDelta : mapView.region.span.latitudeDelta,
-            MapInfo.Keys.LongitudeDelta : mapView.region.span.longitudeDelta
-        ]
-        
-        // if the mapInfo object is already created we just update the values of it
-        if mapInfo != nil {
-            mapInfo.setValues(positionDictionary)
-        } else {
-            mapInfo = MapInfo(dictionary: positionDictionary, context: sharedContext)
-        }
-        
-        saveContextInCoreData()
-    }
-    
-    // Show the error alert to the user
-    private func showErrorAlert(message: String) {
-        let alert = UIAlertController(title: "Error", message: message, preferredStyle: UIAlertControllerStyle.Alert)
-        alert.addAction(UIAlertAction(title: "Ok", style: UIAlertActionStyle.Default, handler:nil))
-        presentViewController(alert, animated: true, completion: nil)
-    }
-    
-    // MARK: Map view delegate
-    
-    func mapView(mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
-        saveRegion()
-    }
     
     // MARK: Fetched results delegate
     
@@ -119,5 +78,24 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
                 default:
                     return
             }
+    }
+    
+    // MARK: Map manager delegate
+    
+    func pinInserted() {
+        //TODO
+    }
+    
+    func operationFinishedWithError(andMessage message: String) {
+        showErrorAlert(message)
+    }
+    
+    // MARK: Private functions
+    
+    // Show the error alert to the user
+    private func showErrorAlert(message: String) {
+        let alert = UIAlertController(title: "Error", message: message, preferredStyle: UIAlertControllerStyle.Alert)
+        alert.addAction(UIAlertAction(title: "Ok", style: UIAlertActionStyle.Default, handler:nil))
+        presentViewController(alert, animated: true, completion: nil)
     }
 }
