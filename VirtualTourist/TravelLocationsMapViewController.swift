@@ -124,7 +124,7 @@ class TravelLocationsMapViewController: UIViewController, MapManagerDelegate, NS
                 
             case .Delete:
                 let fetchRequest = NSFetchRequest(entityName: "Pin")
-                fetchRequest.sortDescriptors = [NSSortDescriptor(key: "latitude", ascending: true)]
+                fetchRequest.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
                 fetchRequest.predicate = NSPredicate(format:"latitude == %lf and longitude == %lf", coordinates.latitude, coordinates.longitude)
                 
                 do {

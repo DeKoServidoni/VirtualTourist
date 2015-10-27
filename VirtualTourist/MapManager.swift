@@ -59,32 +59,18 @@ class MapManager: NSObject, MKMapViewDelegate {
     
     // insert the Pin in the Map
     func insertPin(pin: Pin) {
-        
-        // create the annotation and set its coordiate
-        let annotation = MKPointAnnotation()
-        annotation.coordinate = pin.coordinate()
-        annotation.title = "Delete this Pin?"
-        
-        // add the pin on the map
-        mapView.addAnnotation(annotation)
+        mapView.addAnnotation(pin)
     }
     
     // delete the Pin in the Map
     func deletePin(pin: Pin) {
-        
-        // create the annotation and set its coordiate
-        let annotation = MKPointAnnotation()
-        annotation.coordinate = pin.coordinate()
-        
-        dispatch_async(dispatch_get_main_queue(), {
-            self.mapView.removeAnnotation(annotation)
-        })
+        mapView.removeAnnotation(pin)
     }
     
     // update the Pin in the Map
     func updatePin(pin: Pin) {
-        deletePin(pin)
-        insertPin(pin)
+        mapView.removeAnnotation(pin)
+        mapView.addAnnotation(pin)
     }
     
     // handle the tap and holding action to place the pin
