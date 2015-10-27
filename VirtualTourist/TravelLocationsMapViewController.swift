@@ -16,7 +16,6 @@ class TravelLocationsMapViewController: UIViewController, MapManagerDelegate, NS
     @IBOutlet weak var mapView: MKMapView!
     
     var mapManager: MapManager!
-    var pins: [Pin]!
     
     // MARK: Application lifecycle
     
@@ -40,11 +39,34 @@ class TravelLocationsMapViewController: UIViewController, MapManagerDelegate, NS
         fetchedResultsController.delegate = self
     }
     
+    override func viewWillAppear(animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        let pins = fetchedResultsController.fetchedObjects
+        
+        if let array = pins as? [Pin] {
+            print("Pin list from CoreData: \(array.count)") //TODO: REMOVE HERE!!
+            
+            for item in array {
+                mapManager.insertPin(item as Pin)
+            }
+        }
+    }
+    
     // MARK: Core data functions
     
     lazy var sharedContext: NSManagedObjectContext = {
        return CoreDataStackManager.sharedInstance().managedObjectContext
     }()
+    
+    // Save the context and handle the error if it occurrs
+    private func saveContext() {
+        do {
+            try CoreDataStackManager.sharedInstance().saveContext()
+        } catch {
+            showErrorAlert("Failed to save the PIN on the map!")
+        }
+    }
     
     // fetched results to get the pins from the core data
     lazy var fetchedResultsController: NSFetchedResultsController = {
@@ -54,36 +76,75 @@ class TravelLocationsMapViewController: UIViewController, MapManagerDelegate, NS
         
         let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: self.sharedContext,
             sectionNameKeyPath: nil,cacheName: nil)
-        
+
         return fetchedResultsController
         
     }()
     
     // MARK: Fetched results delegate
     
-    func controller(controller: NSFetchedResultsController, didChangeSection sectionInfo: NSFetchedResultsSectionInfo, atIndex sectionIndex: Int, forChangeType type: NSFetchedResultsChangeType) {
+    func controller(controller: NSFetchedResultsController, didChangeObject anObject: AnyObject, atIndexPath indexPath: NSIndexPath?, forChangeType type: NSFetchedResultsChangeType, newIndexPath: NSIndexPath?) {
+        
+        switch type {
             
-            switch type {
-                
-                case .Insert:
-                    //TODO: AQUI! - Insert the pin when 
-                    break
-                
-                case .Update:
-                    break
-                
-                case .Move:
-                    break
-                
-                default:
-                    return
-            }
+        case .Insert:
+            mapManager.insertPin(anObject as! Pin)
+            break
+            
+        case .Update:
+            mapManager.updatePin(anObject as! Pin)
+            break
+            
+        case .Delete:
+            mapManager.deletePin(anObject as! Pin)
+            break
+            
+        default:
+            // do nothing
+            return
+        }
     }
     
     // MARK: Map manager delegate
     
-    func pinInserted(annotation: MKPointAnnotation) {
-        //TODO
+    func operationFinishedAt(coordinate: CLLocationCoordinate2D?, ofType type: AppConstants.OperationType){
+        
+        guard let coordinates = coordinate as CLLocationCoordinate2D! else {
+            showErrorAlert("Invalid coordinates!")
+            return
+        }
+        
+        switch type {
+            
+            case .Insert:
+                let pin = Pin(latitude: coordinates.latitude, longitude: coordinates.longitude, context: sharedContext)
+                sharedContext.insertObject(pin)
+                saveContext()
+                break
+                
+            case .Delete:
+                let fetchRequest = NSFetchRequest(entityName: "Pin")
+                fetchRequest.sortDescriptors = [NSSortDescriptor(key: "latitude", ascending: true)]
+                fetchRequest.predicate = NSPredicate(format:"latitude == %lf and longitude == %lf", coordinates.latitude, coordinates.longitude)
+                
+                do {
+                 let results = try sharedContext.executeFetchRequest(fetchRequest) as? [Pin]
+                    
+                    if let pins = results {
+                        let deletePin = pins[0] as Pin
+                        sharedContext.deleteObject(deletePin)
+                        saveContext()
+                    }
+                    
+                } catch {}
+
+                break
+                
+            case .Update:
+                //TODO
+                break
+            
+        }
     }
     
     func operationFinishedWithError(andMessage message: String) {

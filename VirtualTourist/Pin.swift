@@ -8,6 +8,7 @@
 
 import Foundation
 import CoreData
+import MapKit
 
 // Class responsible to represent a PIN in the core data model
 class Pin: NSManagedObject {
@@ -27,5 +28,9 @@ class Pin: NSManagedObject {
         
         self.latitude = latitude
         self.longitude = longitude
+    }
+    
+    func coordinate() -> CLLocationCoordinate2D {
+        return CLLocationCoordinate2DMake(latitude as CLLocationDegrees, longitude as CLLocationDegrees)
     }
 }

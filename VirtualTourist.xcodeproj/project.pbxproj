@@ -19,6 +19,7 @@
 		3FDEA6661BDB2BCD00388930 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3FDEA6641BDB2BCD00388930 /* Main.storyboard */; };
 		3FDEA6681BDB2BCD00388930 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3FDEA6671BDB2BCD00388930 /* Assets.xcassets */; };
 		3FDEA66B1BDB2BCD00388930 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3FDEA6691BDB2BCD00388930 /* LaunchScreen.storyboard */; };
+		3FE751A41BDF01FC00404750 /* AppConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FE751A31BDF01FC00404750 /* AppConstants.swift */; settings = {ASSET_TAGS = (); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -36,6 +37,7 @@
 		3FDEA6671BDB2BCD00388930 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		3FDEA66A1BDB2BCD00388930 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		3FDEA66C1BDB2BCD00388930 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		3FE751A31BDF01FC00404750 /* AppConstants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppConstants.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -98,6 +100,7 @@
 			isa = PBXGroup;
 			children = (
 				3FDEA6601BDB2BCD00388930 /* AppDelegate.swift */,
+				3FE751A31BDF01FC00404750 /* AppConstants.swift */,
 				3F6003E51BDC7CC4009A3E21 /* Core Data */,
 				3F6003E61BDC7CF2009A3E21 /* Models */,
 				3F56D1631BDDB9930079906F /* Managers */,
@@ -186,6 +189,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3F6003F51BDC8A08009A3E21 /* TravelLocationsMapViewController.swift in Sources */,
+				3FE751A41BDF01FC00404750 /* AppConstants.swift in Sources */,
 				3F6003EF1BDC83C8009A3E21 /* VirtualTouristModel.xcdatamodeld in Sources */,
 				3F6003EA1BDC80BB009A3E21 /* Photo.swift in Sources */,
 				3F6003E81BDC801E009A3E21 /* Pin.swift in Sources */,

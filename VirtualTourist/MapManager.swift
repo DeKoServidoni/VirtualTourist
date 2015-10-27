@@ -13,7 +13,7 @@ import CoreData
 // Protocol responsible to comunicate with the caller of this manager
 //
 protocol MapManagerDelegate {
-    func pinInserted(annotation: MKPointAnnotation)
+    func operationFinishedAt(coordinate: CLLocationCoordinate2D?, ofType type: AppConstants.OperationType)
     func operationFinishedWithError(andMessage message: String)
 }
 
@@ -21,9 +21,13 @@ protocol MapManagerDelegate {
 //
 class MapManager: NSObject, MKMapViewDelegate {
     
+    // MARK: Properties
+    
     var mapInfo: MapInfo!
+    
     var mapView: MKMapView!
     var sharedContext: NSManagedObjectContext!
+    
     var delegate: MapManagerDelegate?
     
     // MARK: Initializer function
@@ -44,13 +48,43 @@ class MapManager: NSObject, MKMapViewDelegate {
     
     // MARK: Public functions
     
+    // prepare the map, get previous zoom and center to initialize it
     func prepareMap() {
-        
         mapInfo = fetchMapInfo()
         
         if mapInfo != nil {
             restoreMapRegion(true)
         }
+    }
+    
+    // insert the Pin in the Map
+    func insertPin(pin: Pin) {
+        
+        // create the annotation and set its coordiate
+        let annotation = MKPointAnnotation()
+        annotation.coordinate = pin.coordinate()
+        annotation.title = "Delete this Pin?"
+        
+        // add the pin on the map
+        mapView.addAnnotation(annotation)
+    }
+    
+    // delete the Pin in the Map
+    func deletePin(pin: Pin) {
+        
+        // create the annotation and set its coordiate
+        let annotation = MKPointAnnotation()
+        annotation.coordinate = pin.coordinate()
+        
+        dispatch_async(dispatch_get_main_queue(), {
+            self.mapView.removeAnnotation(annotation)
+        })
+    }
+    
+    // update the Pin in the Map
+    func updatePin(pin: Pin) {
+        deletePin(pin)
+        insertPin(pin)
     }
     
     // handle the tap and holding action to place the pin
@@ -62,17 +96,8 @@ class MapManager: NSObject, MKMapViewDelegate {
             let touchPoint = sender.locationInView(mapView)
             let coordinate = mapView.convertPoint(touchPoint, toCoordinateFromView: mapView)
             
-            // create the annotation and set its coordiate
-            let annotation = MKPointAnnotation()
-            annotation.coordinate = coordinate
-            annotation.title = "Delete this Pin?"
-            
-            // add the pin on the map
-            mapView.addAnnotation(annotation)
-            
             // send this annotation to the view controller to be processed
-            //delegate?.pinInserted(annotation)
-            print("ADD PIN")
+            delegate?.operationFinishedAt(coordinate, ofType: AppConstants.OperationType.Insert)
         }
     }
     
@@ -153,7 +178,7 @@ class MapManager: NSObject, MKMapViewDelegate {
         
         // update the pin when the drag is cancelled or ended
         if newState == MKAnnotationViewDragState.Ending || newState == MKAnnotationViewDragState.Canceling {
-            print("UPDATE PIN!")
+            delegate?.operationFinishedAt(view.annotation?.coordinate, ofType: AppConstants.OperationType.Update)
         }
     }
     
@@ -178,6 +203,6 @@ class MapManager: NSObject, MKMapViewDelegate {
     
     func mapView(mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
         // delete pin when the annotation is clicked
-        print("REMOVE PIN!")
+        delegate?.operationFinishedAt(view.annotation?.coordinate, ofType: AppConstants.OperationType.Delete)
     }
 }
