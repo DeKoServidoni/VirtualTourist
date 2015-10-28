@@ -45,7 +45,7 @@ class TravelLocationsMapViewController: UIViewController, MapManagerDelegate, NS
         let pins = fetchedResultsController.fetchedObjects
         
         if let array = pins as? [Pin] {
-            print("Pin list from CoreData: \(array.count)") //TODO: REMOVE HERE!!
+            print("Pin list from CoreData: \(array.count)") //TODO: REMOVE HERE!! <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
             
             for item in array {
                 mapManager.insertPin(item as Pin)
@@ -84,74 +84,116 @@ class TravelLocationsMapViewController: UIViewController, MapManagerDelegate, NS
     // MARK: Fetched results delegate
     
     func controller(controller: NSFetchedResultsController, didChangeObject anObject: AnyObject, atIndexPath indexPath: NSIndexPath?, forChangeType type: NSFetchedResultsChangeType, newIndexPath: NSIndexPath?) {
-        
+
         switch type {
             
-        case .Insert:
-            mapManager.insertPin(anObject as! Pin)
-            break
-            
-        case .Update:
-            mapManager.updatePin(anObject as! Pin)
-            break
-            
-        case .Delete:
-            mapManager.deletePin(anObject as! Pin)
-            break
-            
-        default:
-            // do nothing
-            return
+            case .Insert:
+                mapManager.insertPin(anObject as! Pin)
+                break
+                
+            case .Move:
+                mapManager.updatePin(anObject as! Pin)
+                break
+                
+            case .Delete:
+                mapManager.deletePin(anObject as! Pin)
+                break
+                
+            default:
+                // do nothing
+                return
         }
     }
     
     // MARK: Map manager delegate
     
-    func operationFinishedAt(coordinate: CLLocationCoordinate2D?, ofType type: AppConstants.OperationType){
+    // insert pin in the core data
+    func operationInsert(coordinate: CLLocationCoordinate2D?) {
         
         guard let coordinates = coordinate as CLLocationCoordinate2D! else {
             showErrorAlert("Invalid coordinates!")
             return
         }
         
-        switch type {
-            
-            case .Insert:
-                let pin = Pin(latitude: coordinates.latitude, longitude: coordinates.longitude, context: sharedContext)
-                sharedContext.insertObject(pin)
-                saveContext()
-                break
-                
-            case .Delete:
-                let fetchRequest = NSFetchRequest(entityName: "Pin")
-                fetchRequest.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
-                fetchRequest.predicate = NSPredicate(format:"latitude == %lf and longitude == %lf", coordinates.latitude, coordinates.longitude)
-                
-                do {
-                 let results = try sharedContext.executeFetchRequest(fetchRequest) as? [Pin]
-                    
-                    if let pins = results {
-                        let deletePin = pins[0] as Pin
-                        sharedContext.deleteObject(deletePin)
-                        saveContext()
-                    }
-                    
-                } catch {}
-
-                break
-                
-            case .Update:
-                //TODO
-                break
-            
+        let pin = Pin(latitude: coordinates.latitude, longitude: coordinates.longitude, context: sharedContext)
+        sharedContext.insertObject(pin)
+        saveContext()
+    }
+    
+    // delete pin of the core data
+    func operationDelete(coordinate: CLLocationCoordinate2D?) {
+        
+        guard let coordinates = coordinate as CLLocationCoordinate2D! else {
+            showErrorAlert("Invalid coordinates!")
+            return
+        }
+        
+        let founded = fetchPinWith(coordinates)
+        
+        if let pin = founded {
+            sharedContext.deleteObject(pin)
+            saveContext()
+        } else {
+            showErrorAlert("Failed to delete pin of the map!")
         }
     }
     
+    // update pin in the core data
+    func operationUpdate(coordinate: CLLocationCoordinate2D?, to newCoordinate: CLLocationCoordinate2D?) {
+        
+        guard let coordinates = coordinate as CLLocationCoordinate2D! else {
+            showErrorAlert("Invalid coordinates!")
+            return
+        }
+        
+        guard let newCoordinates = newCoordinate as CLLocationCoordinate2D! else {
+            showErrorAlert("Invalid coordinates!")
+            return
+        }
+        
+        let founded = fetchPinWith(coordinates)
+        
+        if let pin = founded {
+            pin.longitude = newCoordinates.longitude
+            pin.latitude = newCoordinates.latitude
+
+            saveContext()
+        } else {
+            showErrorAlert("Failed to update pin of the map!")
+        }
+    }
+
     func operationFinishedWithError(andMessage message: String) {
         showErrorAlert(message)
     }
     
     // MARK: Private functions
+    
+    // Get fetch Pin from location 
+    private func fetchPinWith(coordinate: CLLocationCoordinate2D) -> Pin? {
+        
+        var pin: Pin? = nil
+        
+        let fetchRequest = NSFetchRequest(entityName: "Pin")
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
+        fetchRequest.predicate = NSPredicate(format:"latitude == %lf and longitude == %lf", coordinate.latitude, coordinate.longitude)
+        
+        do {
+            let results = try sharedContext.executeFetchRequest(fetchRequest) as? [Pin]
+            
+            if let pins = results {
+                
+                if pins.count > 0 {
+                    pin = pins[0] as Pin
+                }
+            }
+            
+        } catch {
+            pin = nil
+        }
+
+        return pin
+    }
     
     // Show the error alert to the user
     private func showErrorAlert(message: String) {

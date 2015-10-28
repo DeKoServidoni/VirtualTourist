@@ -13,7 +13,9 @@ import CoreData
 // Protocol responsible to comunicate with the caller of this manager
 //
 protocol MapManagerDelegate {
-    func operationFinishedAt(coordinate: CLLocationCoordinate2D?, ofType type: AppConstants.OperationType)
+    func operationInsert(coordinate: CLLocationCoordinate2D?)
+    func operationDelete(coordinate: CLLocationCoordinate2D?)
+    func operationUpdate(coordinate: CLLocationCoordinate2D?, to newCoordinate: CLLocationCoordinate2D?)
     func operationFinishedWithError(andMessage message: String)
 }
 
@@ -27,6 +29,9 @@ class MapManager: NSObject, MKMapViewDelegate {
     
     var mapView: MKMapView!
     var sharedContext: NSManagedObjectContext!
+    
+    var dragStartedCoordinate: CLLocationCoordinate2D?
+    var dragStartedAnnotation: MKAnnotationView?
     
     var delegate: MapManagerDelegate?
     
@@ -69,8 +74,14 @@ class MapManager: NSObject, MKMapViewDelegate {
     
     // update the Pin in the Map
     func updatePin(pin: Pin) {
-        mapView.removeAnnotation(pin)
-        mapView.addAnnotation(pin)
+        
+        if let annotation = dragStartedAnnotation?.annotation {
+            mapView.removeAnnotation(annotation)
+            mapView.addAnnotation(pin)
+            
+            // clean the temporary annotation
+            dragStartedAnnotation = nil
+        }
     }
     
     // handle the tap and holding action to place the pin
@@ -83,7 +94,7 @@ class MapManager: NSObject, MKMapViewDelegate {
             let coordinate = mapView.convertPoint(touchPoint, toCoordinateFromView: mapView)
             
             // send this annotation to the view controller to be processed
-            delegate?.operationFinishedAt(coordinate, ofType: AppConstants.OperationType.Insert)
+            delegate?.operationInsert(coordinate)
         }
     }
     
@@ -162,9 +173,14 @@ class MapManager: NSObject, MKMapViewDelegate {
     
     func mapView(mapView: MKMapView, annotationView view: MKAnnotationView, didChangeDragState newState: MKAnnotationViewDragState, fromOldState oldState: MKAnnotationViewDragState) {
         
-        // update the pin when the drag is cancelled or ended
         if newState == MKAnnotationViewDragState.Ending || newState == MKAnnotationViewDragState.Canceling {
-            delegate?.operationFinishedAt(view.annotation?.coordinate, ofType: AppConstants.OperationType.Update)
+            // when the drag is finished or cancelled, we send the started coordinate and the new coordinate
+            // to the core data to update the pin values
+            delegate?.operationUpdate(dragStartedCoordinate, to: view.annotation?.coordinate)
+        } else if newState == MKAnnotationViewDragState.Starting {
+            // first we hold the initial coordinate of the drag pin
+            dragStartedCoordinate = view.annotation?.coordinate
+            dragStartedAnnotation = view
         }
     }
     
@@ -183,12 +199,13 @@ class MapManager: NSObject, MKMapViewDelegate {
             pinView!.annotation = annotation
         }
         
+        pinView?.animatesDrop = true
         pinView?.draggable = true
         return pinView
     }
     
     func mapView(mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
         // delete pin when the annotation is clicked
-        delegate?.operationFinishedAt(view.annotation?.coordinate, ofType: AppConstants.OperationType.Delete)
+        delegate?.operationDelete(view.annotation?.coordinate)
     }
 }
