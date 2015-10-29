@@ -14,7 +14,6 @@ import CoreData
 //
 protocol MapManagerDelegate {
     func operationInsert(coordinate: CLLocationCoordinate2D?)
-    func operationDelete(coordinate: CLLocationCoordinate2D?)
     func operationUpdate(coordinate: CLLocationCoordinate2D?, to newCoordinate: CLLocationCoordinate2D?)
     func operationFinishedWithError(andMessage message: String)
 }
@@ -177,6 +176,7 @@ class MapManager: NSObject, MKMapViewDelegate {
             // when the drag is finished or cancelled, we send the started coordinate and the new coordinate
             // to the core data to update the pin values
             delegate?.operationUpdate(dragStartedCoordinate, to: view.annotation?.coordinate)
+
         } else if newState == MKAnnotationViewDragState.Starting {
             // first we hold the initial coordinate of the drag pin
             dragStartedCoordinate = view.annotation?.coordinate
@@ -191,9 +191,8 @@ class MapManager: NSObject, MKMapViewDelegate {
         
         if pinView == nil {
             pinView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: "MapPin")
-            pinView!.canShowCallout = true
+            pinView!.canShowCallout = false
             pinView!.pinTintColor =  UIColor.orangeColor()
-            pinView!.rightCalloutAccessoryView = UIButton(type: .DetailDisclosure)
         }
         else {
             pinView!.annotation = annotation
@@ -204,8 +203,7 @@ class MapManager: NSObject, MKMapViewDelegate {
         return pinView
     }
     
-    func mapView(mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
-        // delete pin when the annotation is clicked
-        delegate?.operationDelete(view.annotation?.coordinate)
+    func mapView(mapView: MKMapView, didSelectAnnotationView view: MKAnnotationView) {
+        print("click 3")
     }
 }

@@ -95,10 +95,6 @@ class TravelLocationsMapViewController: UIViewController, MapManagerDelegate, NS
                 mapManager.updatePin(anObject as! Pin)
                 break
                 
-            case .Delete:
-                mapManager.deletePin(anObject as! Pin)
-                break
-                
             default:
                 // do nothing
                 return
@@ -175,7 +171,7 @@ class TravelLocationsMapViewController: UIViewController, MapManagerDelegate, NS
         var pin: Pin? = nil
         
         let fetchRequest = NSFetchRequest(entityName: "Pin")
-        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "latitude", ascending: true)]
         fetchRequest.predicate = NSPredicate(format:"latitude == %lf and longitude == %lf", coordinate.latitude, coordinate.longitude)
         
         do {
