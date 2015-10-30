@@ -11,7 +11,7 @@ import UIKit
 import MapKit
 import CoreData
 
-class TravelLocationsMapViewController: UIViewController, MapManagerDelegate, NSFetchedResultsControllerDelegate {
+class TravelLocationsMapViewController: BaseViewController, MapManagerDelegate, NSFetchedResultsControllerDelegate {
     
     @IBOutlet weak var mapView: MKMapView!
     
@@ -31,55 +31,22 @@ class TravelLocationsMapViewController: UIViewController, MapManagerDelegate, NS
         
         // load saved pins
         do {
-            try fetchedResultsController.performFetch()
+            try fetchedPinResultsController.performFetch()
         } catch {
             showErrorAlert("Failed to load the saved pins.")
         }
         
-        fetchedResultsController.delegate = self
-    }
-    
-    override func viewWillAppear(animated: Bool) {
-        super.viewWillAppear(animated)
+        fetchedPinResultsController.delegate = self
         
-        let pins = fetchedResultsController.fetchedObjects
+        // initialize the map with the pins
+        let pins = fetchedPinResultsController.fetchedObjects
         
         if let array = pins as? [Pin] {
-            print("Pin list from CoreData: \(array.count)") //TODO: REMOVE HERE!! <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-            
             for item in array {
                 mapManager.insertPin(item as Pin)
             }
         }
     }
-    
-    // MARK: Core data functions
-    
-    lazy var sharedContext: NSManagedObjectContext = {
-       return CoreDataStackManager.sharedInstance().managedObjectContext
-    }()
-    
-    // Save the context and handle the error if it occurrs
-    private func saveContext() {
-        do {
-            try CoreDataStackManager.sharedInstance().saveContext()
-        } catch {
-            showErrorAlert("Failed to save the PIN on the map!")
-        }
-    }
-    
-    // fetched results to get the pins from the core data
-    lazy var fetchedResultsController: NSFetchedResultsController = {
-        
-        let fetchRequest = NSFetchRequest(entityName: "Pin")
-        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "latitude", ascending: true)]
-        
-        let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: self.sharedContext,
-            sectionNameKeyPath: nil,cacheName: nil)
-
-        return fetchedResultsController
-        
-    }()
     
     // MARK: Fetched results delegate
     
@@ -158,7 +125,16 @@ class TravelLocationsMapViewController: UIViewController, MapManagerDelegate, NS
             showErrorAlert("Failed to update pin of the map!")
         }
     }
+    
+    // show the album view controller of that pin coordinates
+    func operationClick(pin: Pin) {
+        let photoAlbumViewController = storyboard!.instantiateViewControllerWithIdentifier("photoAlbum") as! PhotoAlbumViewController
+        photoAlbumViewController.pin = pin
+        
+        navigationController?.pushViewController(photoAlbumViewController, animated: true)
+    }
 
+    // show the error of any operation
     func operationFinishedWithError(andMessage message: String) {
         showErrorAlert(message)
     }
@@ -178,7 +154,6 @@ class TravelLocationsMapViewController: UIViewController, MapManagerDelegate, NS
             let results = try sharedContext.executeFetchRequest(fetchRequest) as? [Pin]
             
             if let pins = results {
-                
                 if pins.count > 0 {
                     pin = pins[0] as Pin
                 }
@@ -189,12 +164,5 @@ class TravelLocationsMapViewController: UIViewController, MapManagerDelegate, NS
         }
 
         return pin
-    }
-    
-    // Show the error alert to the user
-    private func showErrorAlert(message: String) {
-        let alert = UIAlertController(title: "Error", message: message, preferredStyle: UIAlertControllerStyle.Alert)
-        alert.addAction(UIAlertAction(title: "Ok", style: UIAlertActionStyle.Default, handler:nil))
-        presentViewController(alert, animated: true, completion: nil)
     }
 }
