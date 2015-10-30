@@ -45,6 +45,10 @@ class PhotoAlbumViewController: BaseViewController, UICollectionViewDataSource, 
         
         if photos?.count == 0 {
             //TODO: request
+            FlickrAPI.sharedInstance().findPhotosOf(pin.coordinate) { (result, error) in
+                let photos = result as! [Photo]
+                print("\(photos.count)")
+            }
         }
     }
     
