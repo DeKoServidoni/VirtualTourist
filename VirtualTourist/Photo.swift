@@ -24,16 +24,17 @@ class Photo: NSManagedObject {
         super.init(entity: entity, insertIntoManagedObjectContext: context)
     }
     
-    init(id: NSNumber, url: NSString, imgPath: NSString?, context: NSManagedObjectContext) {
+    init(content: [String:AnyObject], context: NSManagedObjectContext) {
         
         let entity = NSEntityDescription.entityForName("Photo", inManagedObjectContext: context)
         super.init(entity: entity!, insertIntoManagedObjectContext: context)
-        
-        self.id = id
-        self.url = url
-        self.imgPath = imgPath
+
+        id = Int(content[FlickrAPI.Flickr.TagId] as? String ?? "") ?? 0
+        url = content[FlickrAPI.Flickr.TagUrlM] as? NSString ?? ""
         
         photoImage = imageWithIdentifier("\(id)");
+        
+        imgPath = ""
     }
     
     func imageWithIdentifier(identifier: String?) -> UIImage? {

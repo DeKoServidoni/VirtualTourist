@@ -2,13 +2,17 @@
 //  FlickrAPI.swift
 //  VirtualTourist
 //
-//  Created by DeKo Servidoni on 10/29/15.
+//  Created by André Servidoni on 10/29/15.
 //  Copyright © 2015 Udacity. All rights reserved.
 //
 
 import Foundation
 import MapKit
+import CoreData
 
+// Class responsible to hold all necessary methods to get the 
+// photos from the Flickr web service
+//
 class FlickrAPI: NSObject {
     
     // singleton instance
@@ -26,17 +30,21 @@ class FlickrAPI: NSObject {
         return NSURLSession.sharedSession()
     }()
     
+    // MARK: Public functions
+    
     // find the photos from the parameted coordinate
     func findPhotosOf(coordinate: CLLocationCoordinate2D, completionHandler: (result: AnyObject!, error: String!) -> Void) {
         
         let methodArguments = [
             "method": Flickr.Method,
             "api_key": Flickr.ApiKey,
-            "bbox": createBoundingBoxStringWith(coordinate.latitude, andLongitude: coordinate.longitude),
+            "lat": "\(coordinate.latitude)",
+            "lon": "\(coordinate.longitude)",
             "safe_search": Flickr.SafeSearch,
             "extras": Flickr.Extras,
             "format": Flickr.DataFormat,
-            "nojsoncallback": Flickr.NoJsonCallback
+            "nojsoncallback": Flickr.NoJsonCallback,
+            "page": "1"
         ]
         
         let urlString = FlickrAPI.Flickr.BaseUrl + formatParameters(methodArguments)
@@ -69,8 +77,6 @@ class FlickrAPI: NSObject {
                 return
             }
             
-            print("\(response)")
-            
             let parsedResponse = self.parseResponseFromAPI(response)
             
             // send the response back to the view controller
@@ -83,39 +89,24 @@ class FlickrAPI: NSObject {
         }.resume()
     }
     
-    // parse the JSON from the API
-    private func parseResponseFromAPI(response: AnyObject!) -> [Photo]? {
-        
-        
-        guard let photos = response["photos"] as? [String:AnyObject] else {
-            return nil
-        }
-        
-        guard let array = photos["photo"] as? [[String:AnyObject]] else {
-            return nil
-        }
-        
-        var photoArray = [Photo]()
-        
-        for item in array {
-            //TODO: parse the photo
-            let title = item["title"] as! String
-            print("Foto: \(title)")
-        }
-        
-        return photoArray
-    }
+    // MARK: Private functions
     
-    // format the coordinates to the bbox standard
-    private func createBoundingBoxStringWith(latitude: Double, andLongitude longitude: Double) -> String {
+    // parse the JSON from the API
+    private func parseResponseFromAPI(response: AnyObject!) -> [[String:AnyObject]]? {
         
-        /* Fix added to ensure box is bounded by minimum and maximums */
-        let bottom_left_lon = max(longitude - Flickr.BoundinBoxHalfWidth, Flickr.LonMin)
-        let bottom_left_lat = max(latitude - Flickr.BoundingBoxHalfHeight, Flickr.LatMin)
-        let top_right_lon = min(longitude + Flickr.BoundingBoxHalfHeight, Flickr.LonMax)
-        let top_right_lat = min(latitude + Flickr.BoundingBoxHalfHeight, Flickr.LatMax)
+        guard let stat = response[Flickr.TagStat] as? String where stat == Flickr.StatOk else {
+            return nil
+        }
         
-        return "\(bottom_left_lon),\(bottom_left_lat),\(top_right_lon),\(top_right_lat)"
+        guard let photos = response[Flickr.TagPhotos] as? [String:AnyObject] else {
+            return nil
+        }
+        
+        guard let array = photos[Flickr.TagPhoto] as? [[String:AnyObject]] else {
+            return nil
+        }
+        
+        return array
     }
     
     // format the parameters to the format of URL

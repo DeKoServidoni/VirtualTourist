@@ -127,7 +127,10 @@ class TravelLocationsMapViewController: BaseViewController, MapManagerDelegate, 
     }
     
     // show the album view controller of that pin coordinates
-    func operationClick(pin: Pin) {
+    func operationClick(coordinate: CLLocationCoordinate2D?) {
+        
+        let pin = fetchPinWith(coordinate!)
+        
         let photoAlbumViewController = storyboard!.instantiateViewControllerWithIdentifier("photoAlbum") as! PhotoAlbumViewController
         photoAlbumViewController.pin = pin
         
@@ -165,4 +168,17 @@ class TravelLocationsMapViewController: BaseViewController, MapManagerDelegate, 
 
         return pin
     }
+    
+    // fetched results to get the pins from the core data
+    lazy var fetchedPinResultsController: NSFetchedResultsController = {
+        
+        let fetchRequest = NSFetchRequest(entityName: "Pin")
+        fetchRequest.sortDescriptors = []
+        
+        let fetchedPinResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: self.sharedContext,
+            sectionNameKeyPath: nil,cacheName: nil)
+        
+        return fetchedPinResultsController
+        
+        }()
 }

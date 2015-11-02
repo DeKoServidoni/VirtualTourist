@@ -20,32 +20,6 @@ class BaseViewController: UIViewController {
         return CoreDataStackManager.sharedInstance().managedObjectContext
         }()
     
-    // fetched results to get the pins from the core data
-    lazy var fetchedPinResultsController: NSFetchedResultsController = {
-        
-        let fetchRequest = NSFetchRequest(entityName: "Pin")
-        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "latitude", ascending: true)]
-        
-        let fetchedPinResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: self.sharedContext,
-            sectionNameKeyPath: nil,cacheName: nil)
-        
-        return fetchedPinResultsController
-        
-        }()
-    
-    // fetched results to get the photos from the core data
-    lazy var fetchedPhotosResultsController: NSFetchedResultsController = {
-        
-        let fetchRequest = NSFetchRequest(entityName: "Photo")
-        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "id", ascending: true)]
-        
-        let fetchedPhotosResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: self.sharedContext,
-            sectionNameKeyPath: nil,cacheName: nil)
-        
-        return fetchedPhotosResultsController
-        
-        }()
-    
     // save the context and handle the error if it occurrs
     func saveContext() {
         do {

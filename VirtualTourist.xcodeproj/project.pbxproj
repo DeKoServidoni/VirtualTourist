@@ -79,8 +79,8 @@
 		3F5C563A1BE2FE0100D807ED /* Connection */ = {
 			isa = PBXGroup;
 			children = (
-				3F5C563D1BE3013D00D807ED /* FlickrAPI.swift */,
 				3F5C563F1BE3014B00D807ED /* FlickrAPIConstants.swift */,
+				3F5C563D1BE3013D00D807ED /* FlickrAPI.swift */,
 			);
 			name = Connection;
 			sourceTree = "<group>";
@@ -128,8 +128,8 @@
 				3F6003E61BDC7CF2009A3E21 /* Models */,
 				3F6003E51BDC7CC4009A3E21 /* Core Data */,
 				3F5C563A1BE2FE0100D807ED /* Connection */,
-				3F56D1631BDDB9930079906F /* Managers */,
 				3F5C56371BE2F32400D807ED /* Custom Cell */,
+				3F56D1631BDDB9930079906F /* Managers */,
 				3F6003F41BDC8A08009A3E21 /* TravelLocationsMapViewController.swift */,
 				3F5C56331BE2D98000D807ED /* PhotoAlbumViewController.swift */,
 				3F5C56351BE2EF1E00D807ED /* BaseViewController.swift */,

@@ -2,10 +2,13 @@
 //  FlickrAPIConstants.swift
 //  VirtualTourist
 //
-//  Created by DeKo Servidoni on 10/29/15.
+//  Created by André Servidoni on 10/29/15.
 //  Copyright © 2015 Udacity. All rights reserved.
 //
 
+// Extension responsible to hold all the constants values
+// required for the Flicker API
+//
 extension FlickrAPI {
  
     struct Flickr {
@@ -20,12 +23,14 @@ extension FlickrAPI {
         static let DataFormat: String = "json"
         static let NoJsonCallback: String = "1"
         
-        // default values
-        static let BoundinBoxHalfWidth = 1.0
-        static let BoundingBoxHalfHeight = 1.0
-        static let LatMin = -90.0
-        static let LatMax = 90.0
-        static let LonMin = -180.0
-        static let LonMax = 180.0
+        // json tags
+        static let TagId: String = "id"
+        static let TagUrlM: String = "url_m"
+        static let TagPhotos: String = "photos"
+        static let TagPhoto: String = "photo"
+        static let TagStat: String = "stat"
+        
+        // expected values
+        static let StatOk: String = "ok"
     }
 }

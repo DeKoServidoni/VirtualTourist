@@ -16,7 +16,7 @@ protocol MapManagerDelegate {
     func operationInsert(coordinate: CLLocationCoordinate2D?)
     func operationUpdate(coordinate: CLLocationCoordinate2D?, to newCoordinate: CLLocationCoordinate2D?)
     func operationFinishedWithError(andMessage message: String)
-    func operationClick(pin: Pin)
+    func operationClick(coordinate: CLLocationCoordinate2D?)
 }
 
 // Class responsible to manage all the operations with the map view from the view controller
@@ -171,20 +171,6 @@ class MapManager: NSObject, MKMapViewDelegate {
         saveRegion()
     }
     
-//    func mapView(mapView: MKMapView, annotationView view: MKAnnotationView, didChangeDragState newState: MKAnnotationViewDragState, fromOldState oldState: MKAnnotationViewDragState) {
-//        
-//        if newState == MKAnnotationViewDragState.Ending || newState == MKAnnotationViewDragState.Canceling {
-//            // when the drag is finished or cancelled, we send the started coordinate and the new coordinate
-//            // to the core data to update the pin values
-//            delegate?.operationUpdate(dragStartedCoordinate, to: view.annotation?.coordinate)
-//
-//        } else if newState == MKAnnotationViewDragState.Starting {
-//            // first we hold the initial coordinate of the drag pin
-//            dragStartedCoordinate = view.annotation?.coordinate
-//            dragStartedAnnotation = view
-//        }
-//    }
-    
     func mapView(mapView: MKMapView, viewForAnnotation annotation: MKAnnotation) -> MKAnnotationView? {
         
         // recycle the pin on the map
@@ -200,12 +186,11 @@ class MapManager: NSObject, MKMapViewDelegate {
         }
         
         pinView?.animatesDrop = true
-//        pinView?.draggable = true
         return pinView
     }
     
     func mapView(mapView: MKMapView, didSelectAnnotationView view: MKAnnotationView) {
         mapView.deselectAnnotation(view.annotation, animated: true)
-        delegate?.operationClick(view.annotation as! Pin)
+        delegate?.operationClick(view.annotation?.coordinate)
     }
 }
