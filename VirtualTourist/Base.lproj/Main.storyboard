@@ -103,7 +103,7 @@
                                     <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
                                 </collectionViewFlowLayout>
                                 <cells>
-                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="PhotoCell" id="QFl-tw-hkl" customClass="PhotoCell" customModule="VirtualTourist" customModuleProvider="target">
+                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="PhotoCellView" id="QFl-tw-hkl" customClass="PhotoCell" customModule="VirtualTourist" customModuleProvider="target">
                                         <rect key="frame" x="0.0" y="0.0" width="50" height="50"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                         <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
@@ -194,12 +194,9 @@
                                 <exclude reference="bB3-MY-rzX"/>
                             </mask>
                             <mask key="constraints">
-                                <exclude reference="8Pk-qf-De1"/>
-                                <exclude reference="Po4-Bm-6jM"/>
-                                <exclude reference="fug-ou-VL1"/>
-                                <exclude reference="076-YK-d5F"/>
-                                <exclude reference="98j-Av-vhz"/>
-                                <exclude reference="qUg-Hv-LvR"/>
+                                <exclude reference="SEq-eU-Zse"/>
+                                <exclude reference="TsL-gp-fyO"/>
+                                <exclude reference="V8H-Li-qxa"/>
                                 <exclude reference="Cmt-Ih-mra"/>
                                 <exclude reference="Rlz-yW-wKp"/>
                                 <exclude reference="sgo-hz-cT6"/>
@@ -208,9 +205,12 @@
                                 <exclude reference="mDh-7p-DLo"/>
                                 <exclude reference="qxn-7U-aR3"/>
                                 <exclude reference="ta0-nl-jSi"/>
-                                <exclude reference="SEq-eU-Zse"/>
-                                <exclude reference="TsL-gp-fyO"/>
-                                <exclude reference="V8H-Li-qxa"/>
+                                <exclude reference="076-YK-d5F"/>
+                                <exclude reference="98j-Av-vhz"/>
+                                <exclude reference="qUg-Hv-LvR"/>
+                                <exclude reference="8Pk-qf-De1"/>
+                                <exclude reference="Po4-Bm-6jM"/>
+                                <exclude reference="fug-ou-VL1"/>
                             </mask>
                         </variation>
                         <variation key="widthClass=compact">
@@ -222,12 +222,9 @@
                                 <include reference="bB3-MY-rzX"/>
                             </mask>
                             <mask key="constraints">
-                                <include reference="8Pk-qf-De1"/>
-                                <include reference="Po4-Bm-6jM"/>
-                                <include reference="fug-ou-VL1"/>
-                                <include reference="076-YK-d5F"/>
-                                <include reference="98j-Av-vhz"/>
-                                <include reference="qUg-Hv-LvR"/>
+                                <include reference="SEq-eU-Zse"/>
+                                <include reference="TsL-gp-fyO"/>
+                                <include reference="V8H-Li-qxa"/>
                                 <include reference="Cmt-Ih-mra"/>
                                 <include reference="Rlz-yW-wKp"/>
                                 <include reference="sgo-hz-cT6"/>
@@ -236,9 +233,12 @@
                                 <include reference="mDh-7p-DLo"/>
                                 <include reference="qxn-7U-aR3"/>
                                 <include reference="ta0-nl-jSi"/>
-                                <include reference="SEq-eU-Zse"/>
-                                <include reference="TsL-gp-fyO"/>
-                                <include reference="V8H-Li-qxa"/>
+                                <include reference="076-YK-d5F"/>
+                                <include reference="98j-Av-vhz"/>
+                                <include reference="qUg-Hv-LvR"/>
+                                <include reference="8Pk-qf-De1"/>
+                                <include reference="Po4-Bm-6jM"/>
+                                <include reference="fug-ou-VL1"/>
                             </mask>
                         </variation>
                     </view>

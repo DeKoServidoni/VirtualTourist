@@ -22,6 +22,7 @@ extension FlickrAPI {
         static let SafeSearch: String = "1"
         static let DataFormat: String = "json"
         static let NoJsonCallback: String = "1"
+        static let PerPage: String = "3"
         
         // json tags
         static let TagId: String = "id"

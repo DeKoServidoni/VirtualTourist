@@ -36,16 +36,12 @@ class PhotoAlbumViewController: BaseViewController, UICollectionViewDataSource, 
         do {
             try fetchedPhotosResultsController.performFetch()
         } catch {
-            showErrorAlert("Failed to load the saved pins.")
+            showErrorAlert("Failed to load the saved photos.")
         }
-        
-        fetchedPhotosResultsController.delegate = self
     }
     
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
-        
-        print("Load photos from web? \(pin.photos.isEmpty)")
         
         if pin.photos.isEmpty {
             
@@ -67,11 +63,10 @@ class PhotoAlbumViewController: BaseViewController, UICollectionViewDataSource, 
                         self.emptyLabel.hidden = false
                     } else {
                         
-                        for item in response {
+                        let _ = response.map() { (item: [String : AnyObject]) -> Photo in
                             let photo = Photo(content: item, context: self.sharedContext)
-                            
-                            // save to CoreData
                             photo.pin = self.pin
+                            return photo
                         }
                         
                         self.collectionView.hidden = false
@@ -171,17 +166,33 @@ class PhotoAlbumViewController: BaseViewController, UICollectionViewDataSource, 
     
         let photo = fetchedPhotosResultsController.objectAtIndexPath(indexPath) as! Photo
         
-        let cell = collectionView.dequeueReusableCellWithReuseIdentifier("PhotoCell", forIndexPath: indexPath) as! PhotoCell
+        let cell = collectionView.dequeueReusableCellWithReuseIdentifier("PhotoCellView", forIndexPath: indexPath) as! PhotoCell
         cell.photo.image = UIImage(named: "placeholder")
         
-//        if photo.imgPath == nil || photo.imgPath == "" {
-//            cell.photo.image = UIImage(named: "noImage")
-//        } else
         if photo.photoImage != nil {
             cell.photo.image = photo.photoImage
         } else {
-            print("DOWNLOAD IMAGE!")
-            //TODO: download the image! <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+            
+            let task = FlickrAPI.sharedInstance().downloadImageOf(photo.url as String) { (data, error) in
+                
+                guard error == nil else {
+                    cell.photo.image = UIImage(named: "noImage")
+                    return
+                }
+                
+                if let data = data {
+                    let image = UIImage(data: data)
+                    
+                    photo.photoImage = image
+                    photo.saveImageWithIdentifier()
+                    
+                    dispatch_async(dispatch_get_main_queue()) {
+                        cell.photo.image = image
+                    }
+                }
+            }
+            
+            cell.taskToCancelifCellIsReused = task
         }
         
         return cell
@@ -192,7 +203,7 @@ class PhotoAlbumViewController: BaseViewController, UICollectionViewDataSource, 
         //TODO: DELETE THE PHOTO <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
     }
     
-    // MARK: Private functions
+    // MARK: Private components
     
     // initialize the map: disable the user interaction and set the pin
     // in the center of the map
@@ -216,6 +227,7 @@ class PhotoAlbumViewController: BaseViewController, UICollectionViewDataSource, 
         fetchRequest.predicate = NSPredicate(format: "pin == %@", self.pin);
         
         let fetchedPhotosResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: self.sharedContext, sectionNameKeyPath: nil,cacheName: nil)
+        fetchedPhotosResultsController.delegate = self
         
         return fetchedPhotosResultsController
         

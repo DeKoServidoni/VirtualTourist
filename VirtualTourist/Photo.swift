@@ -33,11 +33,20 @@ class Photo: NSManagedObject {
         url = content[FlickrAPI.Flickr.TagUrlM] as? NSString ?? ""
         
         photoImage = imageWithIdentifier("\(id)");
-        
-        imgPath = ""
     }
     
-    func imageWithIdentifier(identifier: String?) -> UIImage? {
+    func saveImageWithIdentifier() {
+        
+        let documentsDirectoryURL: NSURL = NSFileManager.defaultManager().URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask).first!
+        let fullURL = documentsDirectoryURL.URLByAppendingPathComponent("\(id)")
+        let path = fullURL.path!
+        
+        // And in documents directory
+        let data = UIImagePNGRepresentation(photoImage!)!
+        data.writeToFile(path, atomically: true)
+    }
+    
+    private func imageWithIdentifier(identifier: String?) -> UIImage? {
         
         // If the identifier is nil, or empty, return nil
         if identifier == nil || identifier! == "" {

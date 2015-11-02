@@ -44,7 +44,8 @@ class FlickrAPI: NSObject {
             "extras": Flickr.Extras,
             "format": Flickr.DataFormat,
             "nojsoncallback": Flickr.NoJsonCallback,
-            "page": "1"
+            "page": "1",
+            "per_page": Flickr.PerPage
         ]
         
         let urlString = FlickrAPI.Flickr.BaseUrl + formatParameters(methodArguments)
@@ -87,6 +88,28 @@ class FlickrAPI: NSObject {
             }
             
         }.resume()
+    }
+    
+    // download the image from URL
+    func downloadImageOf(path: String!, completionHandler: (imageData: NSData?, error: String?) ->  Void) -> NSURLSessionTask {
+        
+        print("\(path)")
+        
+        let url = NSURL(string: path)
+        let request = NSURLRequest(URL: url!)
+        
+        let task = sharedSession.dataTaskWithRequest(request) { (data, result, error) in
+            
+            if let _ = error {
+                completionHandler(imageData: nil, error: "Failed to load image")
+            } else {
+                completionHandler(imageData: data, error: nil)
+            }
+        }
+        
+        task.resume()
+        
+        return task
     }
     
     // MARK: Private functions
