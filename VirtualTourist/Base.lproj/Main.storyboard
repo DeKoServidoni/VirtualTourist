@@ -93,9 +93,9 @@
                             <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="siW-aL-et1">
                                 <rect key="frame" x="0.0" y="0.0" width="240" height="128"/>
                             </mapView>
-                            <collectionView hidden="YES" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="0Hs-HS-Kmp">
+                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="0Hs-HS-Kmp">
                                 <rect key="frame" x="0.0" y="0.0" width="240" height="128"/>
-                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                                 <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="3hG-a9-80o">
                                     <size key="itemSize" width="146" height="144"/>
                                     <size key="headerReferenceSize" width="0.0" height="0.0"/>
@@ -103,46 +103,31 @@
                                     <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
                                 </collectionViewFlowLayout>
                                 <cells>
-                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="PhotoCellView" id="QFl-tw-hkl" customClass="PhotoCell" customModule="VirtualTourist" customModuleProvider="target">
+                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" reuseIdentifier="PhotoCellView" id="QFl-tw-hkl" customClass="PhotoCell" customModule="VirtualTourist" customModuleProvider="target">
                                         <rect key="frame" x="0.0" y="0.0" width="50" height="50"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                         <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
                                             <rect key="frame" x="0.0" y="0.0" width="146" height="144"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="placeholder" translatesAutoresizingMaskIntoConstraints="NO" id="VxV-zF-QbY">
+                                                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="placeholder" translatesAutoresizingMaskIntoConstraints="NO" id="VxV-zF-QbY">
                                                     <rect key="frame" x="0.0" y="0.0" width="240" height="128"/>
                                                     <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                                    <variation key="widthClass=compact" fixedFrame="YES">
+                                                        <rect key="frame" x="0.0" y="0.0" width="146" height="144"/>
+                                                    </variation>
                                                 </imageView>
                                             </subviews>
                                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                         </view>
-                                        <constraints>
-                                            <constraint firstItem="VxV-zF-QbY" firstAttribute="leading" secondItem="QFl-tw-hkl" secondAttribute="leadingMargin" constant="-8" id="2rJ-7F-5Yp"/>
-                                            <constraint firstAttribute="bottomMargin" secondItem="VxV-zF-QbY" secondAttribute="bottom" constant="-8" id="AiV-JV-qR7"/>
-                                            <constraint firstItem="VxV-zF-QbY" firstAttribute="top" secondItem="QFl-tw-hkl" secondAttribute="topMargin" constant="-8" id="GMJ-b1-mit"/>
-                                            <constraint firstAttribute="trailingMargin" secondItem="VxV-zF-QbY" secondAttribute="trailing" constant="-8" id="IRH-0K-xAf"/>
-                                        </constraints>
                                         <variation key="default">
                                             <mask key="subviews">
                                                 <exclude reference="VxV-zF-QbY"/>
-                                            </mask>
-                                            <mask key="constraints">
-                                                <exclude reference="2rJ-7F-5Yp"/>
-                                                <exclude reference="AiV-JV-qR7"/>
-                                                <exclude reference="GMJ-b1-mit"/>
-                                                <exclude reference="IRH-0K-xAf"/>
                                             </mask>
                                         </variation>
                                         <variation key="widthClass=compact">
                                             <mask key="subviews">
                                                 <include reference="VxV-zF-QbY"/>
-                                            </mask>
-                                            <mask key="constraints">
-                                                <include reference="2rJ-7F-5Yp"/>
-                                                <include reference="AiV-JV-qR7"/>
-                                                <include reference="GMJ-b1-mit"/>
-                                                <include reference="IRH-0K-xAf"/>
                                             </mask>
                                         </variation>
                                         <connections>

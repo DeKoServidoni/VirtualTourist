@@ -14,52 +14,70 @@ import UIKit
 class Photo: NSManagedObject {
     
     @NSManaged var id: NSNumber
-    @NSManaged var url: NSString
+    @NSManaged var url: NSString?
     @NSManaged var imgPath: NSString?
     @NSManaged var pin: Pin?
     
-    var photoImage: UIImage?
+    var photoImage: UIImage? {
+        
+        get {
+            return imageWithIdentifier()
+        }
+        
+        set {
+            saveImageWithIdentifier(newValue)
+        }
+    }
     
     override init(entity: NSEntityDescription, insertIntoManagedObjectContext context: NSManagedObjectContext?) {
         super.init(entity: entity, insertIntoManagedObjectContext: context)
     }
     
     init(content: [String:AnyObject], context: NSManagedObjectContext) {
-        
         let entity = NSEntityDescription.entityForName("Photo", inManagedObjectContext: context)
         super.init(entity: entity!, insertIntoManagedObjectContext: context)
 
         id = Int(content[FlickrAPI.Flickr.TagId] as? String ?? "") ?? 0
         url = content[FlickrAPI.Flickr.TagUrlM] as? NSString ?? ""
-        
-        photoImage = imageWithIdentifier("\(id)");
     }
     
-    func saveImageWithIdentifier() {
-        
-        let documentsDirectoryURL: NSURL = NSFileManager.defaultManager().URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask).first!
-        let fullURL = documentsDirectoryURL.URLByAppendingPathComponent("\(id)")
-        let path = fullURL.path!
-        
-        // And in documents directory
-        let data = UIImagePNGRepresentation(photoImage!)!
-        data.writeToFile(path, atomically: true)
-    }
+    // MARK: Private functions
     
-    private func imageWithIdentifier(identifier: String?) -> UIImage? {
+    // get the image from file
+    private func imageWithIdentifier() -> UIImage? {
+        let path = getPath()
         
-        // If the identifier is nil, or empty, return nil
-        if identifier == nil || identifier! == "" {
-            return nil
+        if path != nil {
+            if let data = NSData(contentsOfFile: path!) {
+                return UIImage(data: data)
+            }
         }
         
-        let documentsDirectoryURL: NSURL = NSFileManager.defaultManager().URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask).first!
-        let fullURL = documentsDirectoryURL.URLByAppendingPathComponent(identifier!)
-        let path = fullURL.path!
+        return nil
+    }
+    
+    // save the image in the path
+    private func saveImageWithIdentifier(value: UIImage!) {
         
-        // Next Try the hard drive
-        if let data = NSData(contentsOfFile: path) {
-            return UIImage(data: data)
+        let path = getPath()
+        
+        if path != nil {
+            imgPath = path
+            
+            let data = UIImageJPEGRepresentation(value, 0.0)!
+            data.writeToFile(imgPath! as String, atomically: true)
+        }
+    }
+    
+    // get image path
+    private func getPath() -> String? {
+
+        if url != "" {
+            let identifier = NSURL(string: url as! String)?.lastPathComponent!
+            
+            let documentsDirectoryURL: NSURL = NSFileManager.defaultManager().URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask).first!
+            
+            return documentsDirectoryURL.URLByAppendingPathComponent(identifier!).path
         }
         
         return nil

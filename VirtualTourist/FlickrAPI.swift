@@ -91,25 +91,31 @@ class FlickrAPI: NSObject {
     }
     
     // download the image from URL
-    func downloadImageOf(path: String!, completionHandler: (imageData: NSData?, error: String?) ->  Void) -> NSURLSessionTask {
-        
+    func downloadImageOf(path: String?, completionHandler: (imageData: NSData?, error: String?) ->  Void) -> NSURLSessionTask? {
+
         print("\(path)")
         
-        let url = NSURL(string: path)
-        let request = NSURLRequest(URL: url!)
-        
-        let task = sharedSession.dataTaskWithRequest(request) { (data, result, error) in
+        if let path = path {
+            let url = NSURL(string: path)
+            let request = NSURLRequest(URL: url!)
             
-            if let _ = error {
-                completionHandler(imageData: nil, error: "Failed to load image")
-            } else {
-                completionHandler(imageData: data, error: nil)
+            let task = sharedSession.dataTaskWithRequest(request) { (data, result, error) in
+                
+                if let _ = error {
+                    completionHandler(imageData: nil, error: "Failed to load image")
+                } else {
+                    completionHandler(imageData: data, error: nil)
+                }
             }
+            
+            task.resume()
+            
+            return task
+            
+        } else {
+            completionHandler(imageData: nil, error: "empty")
+            return nil
         }
-        
-        task.resume()
-        
-        return task
     }
     
     // MARK: Private functions

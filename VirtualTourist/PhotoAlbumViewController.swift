@@ -25,6 +25,19 @@ class PhotoAlbumViewController: BaseViewController, UICollectionViewDataSource, 
     var deletedIndexPaths: [NSIndexPath]!
     var updatedIndexPaths: [NSIndexPath]!
     
+    // fetched results to get the photos from the core data
+    lazy var fetchedPhotosResultsController: NSFetchedResultsController = {
+        
+        let fetchRequest = NSFetchRequest(entityName: "Photo")
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "id", ascending: true)]
+        fetchRequest.predicate = NSPredicate(format: "pin == %@", self.pin);
+        
+        let fetchedPhotosResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: self.sharedContext, sectionNameKeyPath: nil,cacheName: nil)
+        
+        return fetchedPhotosResultsController
+        
+        }()
+    
     // MARK: Lifecycle functions
     
     override func viewDidLoad() {
@@ -32,12 +45,16 @@ class PhotoAlbumViewController: BaseViewController, UICollectionViewDataSource, 
         
         initializeMap()
         
+        self.collectionView.hidden = false
+        
         // load saved pins
         do {
             try fetchedPhotosResultsController.performFetch()
         } catch {
             showErrorAlert("Failed to load the saved photos.")
         }
+        
+        fetchedPhotosResultsController.delegate = self
     }
     
     override func viewWillAppear(animated: Bool) {
@@ -65,11 +82,12 @@ class PhotoAlbumViewController: BaseViewController, UICollectionViewDataSource, 
                         
                         let _ = response.map() { (item: [String : AnyObject]) -> Photo in
                             let photo = Photo(content: item, context: self.sharedContext)
+                            
                             photo.pin = self.pin
                             return photo
                         }
                         
-                        self.collectionView.hidden = false
+                        self.saveContext()
                     }
                 }
             }
@@ -167,28 +185,34 @@ class PhotoAlbumViewController: BaseViewController, UICollectionViewDataSource, 
         let photo = fetchedPhotosResultsController.objectAtIndexPath(indexPath) as! Photo
         
         let cell = collectionView.dequeueReusableCellWithReuseIdentifier("PhotoCellView", forIndexPath: indexPath) as! PhotoCell
-        cell.photo.image = UIImage(named: "placeholder")
         
-        if photo.photoImage != nil {
+        if photo.url == "" {
+            cell.photo.image = UIImage(named: "noImage")
+            
+        } else if photo.photoImage != nil {
             cell.photo.image = photo.photoImage
+            
         } else {
             
-            let task = FlickrAPI.sharedInstance().downloadImageOf(photo.url as String) { (data, error) in
+            let task = FlickrAPI.sharedInstance().downloadImageOf(photo.url as? String) { (data, error) in
+                
+                let image: UIImage!
                 
                 guard error == nil else {
-                    cell.photo.image = UIImage(named: "noImage")
+                    image = UIImage(named: "noImage")
                     return
                 }
                 
                 if let data = data {
-                    let image = UIImage(data: data)
+                    photo.photoImage = UIImage(data: data)
+                    image = photo.photoImage
                     
-                    photo.photoImage = image
-                    photo.saveImageWithIdentifier()
-                    
-                    dispatch_async(dispatch_get_main_queue()) {
-                        cell.photo.image = image
-                    }
+                } else {
+                    image = UIImage(named: "noImage")
+                }
+                
+                dispatch_async(dispatch_get_main_queue()) {
+                    cell.photo.image = image
                 }
             }
             
@@ -218,18 +242,4 @@ class PhotoAlbumViewController: BaseViewController, UICollectionViewDataSource, 
         mapView.setRegion(centeredRegion, animated: true)
         mapView.addAnnotation(pin)
     }
-    
-    // fetched results to get the photos from the core data
-    lazy var fetchedPhotosResultsController: NSFetchedResultsController = {
-        
-        let fetchRequest = NSFetchRequest(entityName: "Photo")
-        fetchRequest.sortDescriptors = []
-        fetchRequest.predicate = NSPredicate(format: "pin == %@", self.pin);
-        
-        let fetchedPhotosResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: self.sharedContext, sectionNameKeyPath: nil,cacheName: nil)
-        fetchedPhotosResultsController.delegate = self
-        
-        return fetchedPhotosResultsController
-        
-        }()
 }
