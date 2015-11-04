@@ -178,18 +178,34 @@ class MapManager: NSObject, MKMapViewDelegate {
         
         if pinView == nil {
             pinView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: "MapPin")
-            pinView!.canShowCallout = false
+            pinView!.canShowCallout = true
             pinView!.pinTintColor =  UIColor.orangeColor()
+            pinView!.rightCalloutAccessoryView = UIButton(type: .DetailDisclosure)
         }
         else {
             pinView!.annotation = annotation
         }
         
         pinView?.animatesDrop = true
+        pinView?.draggable = true
         return pinView
     }
     
-    func mapView(mapView: MKMapView, didSelectAnnotationView view: MKAnnotationView) {
+    func mapView(mapView: MKMapView, annotationView view: MKAnnotationView, didChangeDragState newState: MKAnnotationViewDragState, fromOldState oldState: MKAnnotationViewDragState) {
+    
+            if newState == MKAnnotationViewDragState.Ending || newState == MKAnnotationViewDragState.Canceling {
+                // when the drag is finished or cancelled, we send the started coordinate and the new coordinate
+                // to the core data to update the pin values
+                delegate?.operationUpdate(dragStartedCoordinate, to: view.annotation?.coordinate)
+    
+            } else if newState == MKAnnotationViewDragState.Starting {
+                // first we hold the initial coordinate of the drag pin
+                dragStartedCoordinate = view.annotation?.coordinate
+                dragStartedAnnotation = view
+            }
+    }
+    
+    func mapView(mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
         mapView.deselectAnnotation(view.annotation, animated: true)
         delegate?.operationClick(view.annotation?.coordinate)
     }

@@ -52,8 +52,6 @@ class FlickrAPI: NSObject {
         let url = NSURL(string: urlString)
         let request = NSURLRequest(URL: url!)
         
-        print("\(urlString)")
-        
         sharedSession.dataTaskWithRequest(request) { (data, result, error) in
         
             guard error == nil else {

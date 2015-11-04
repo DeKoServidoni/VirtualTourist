@@ -20,7 +20,7 @@ class Pin: NSManagedObject, MKAnnotation {
     private var _coords: CLLocationCoordinate2D?
     var coordinate: CLLocationCoordinate2D {
         
-        set (newCoordinate) { _coords = newCoordinate }
+        set { _coords = newValue }
         
         get {
             if _coords == nil {
@@ -47,5 +47,31 @@ class Pin: NSManagedObject, MKAnnotation {
         self.longitude = longitude
         
         coordinate = CLLocationCoordinate2DMake(latitude as CLLocationDegrees, longitude as CLLocationDegrees)
+        setCoordinateTitle()
+    }
+    
+    // MARK: Public functions
+    
+    func setCoordinateTitle() {
+        title = "Map Pin"
+        
+        // try to get the equivalent city name from the location
+        let location = CLLocation(latitude: self.latitude as CLLocationDegrees, longitude: self.longitude as CLLocationDegrees)
+        let geoCoder = CLGeocoder()
+        
+        geoCoder.reverseGeocodeLocation(location, completionHandler: { (placemarks, error) in
+            
+            let placeArray = placemarks as [CLPlacemark]!
+            
+            // place details
+            if let placeMark = placeArray?[0] {
+                
+                if let infoDictionary = placeMark.addressDictionary as? [String : AnyObject] {
+                    
+                    self.title = infoDictionary["City"] as? String
+                }
+                
+            }
+        })
     }
 }

@@ -43,7 +43,10 @@ class TravelLocationsMapViewController: BaseViewController, MapManagerDelegate, 
         
         if let array = pins as? [Pin] {
             for item in array {
-                mapManager.insertPin(item as Pin)
+                let pin = item as Pin
+                pin.setCoordinateTitle()
+                
+                mapManager.insertPin(pin)
             }
         }
     }
@@ -117,8 +120,13 @@ class TravelLocationsMapViewController: BaseViewController, MapManagerDelegate, 
         let founded = fetchPinWith(coordinates)
         
         if let pin = founded {
+            
+            // delete all photos from the core data of the previous coordinate
+            cleanPhotosOf(pin)
+            
             pin.longitude = newCoordinates.longitude
             pin.latitude = newCoordinates.latitude
+            pin.setCoordinateTitle()
 
             saveContext()
         } else {
@@ -143,6 +151,32 @@ class TravelLocationsMapViewController: BaseViewController, MapManagerDelegate, 
     }
     
     // MARK: Private functions
+    
+    // remove all photos from the pin
+    func cleanPhotosOf(pin: Pin) {
+        
+        do {
+            let fetchRequest = NSFetchRequest(entityName: "Photo")
+            fetchRequest.sortDescriptors = [NSSortDescriptor(key: "id", ascending: true)]
+            fetchRequest.predicate = NSPredicate(format: "pin == %@", pin);
+            
+            let photos = try sharedContext.executeFetchRequest(fetchRequest) as! [Photo]
+            
+            for item in photos {
+                
+                let photo = item as Photo
+                photo.deletePhotoAtDisk()
+                
+                sharedContext.deleteObject(photo)
+            }
+            
+            saveContext()
+            
+        } catch {
+            showErrorAlert("Failed to clean photos after move the pin")
+        }
+    }
+
     
     // Get fetch Pin from location 
     private func fetchPinWith(coordinate: CLLocationCoordinate2D) -> Pin? {
