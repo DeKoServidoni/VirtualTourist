@@ -140,6 +140,11 @@ class PhotoAlbumViewController: BaseViewController, UICollectionViewDataSource, 
                 
             case .Delete:
                 deletedIndexPaths.append(indexPath!)
+                
+                let photo = anObject as! Photo
+                if !photo.deletePhotoAtDisk() {
+                    showErrorAlert("Failed to delete image!")
+                }
                 break
             
             case .Update:
@@ -206,7 +211,7 @@ class PhotoAlbumViewController: BaseViewController, UICollectionViewDataSource, 
                 if let data = data {
                     photo.photoImage = UIImage(data: data)
                     image = photo.photoImage
-                    
+                
                 } else {
                     image = UIImage(named: "noImage")
                 }
@@ -223,8 +228,10 @@ class PhotoAlbumViewController: BaseViewController, UICollectionViewDataSource, 
     }
     
     func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
-        print("DELETE IMAGE!")
-        //TODO: DELETE THE PHOTO <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+        let photo = fetchedPhotosResultsController.objectAtIndexPath(indexPath) as! Photo
+        
+        sharedContext.deleteObject(photo)
+        saveContext()
     }
     
     // MARK: Private components

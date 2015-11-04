@@ -52,6 +52,8 @@ class FlickrAPI: NSObject {
         let url = NSURL(string: urlString)
         let request = NSURLRequest(URL: url!)
         
+        print("\(urlString)")
+        
         sharedSession.dataTaskWithRequest(request) { (data, result, error) in
         
             guard error == nil else {
@@ -92,8 +94,6 @@ class FlickrAPI: NSObject {
     
     // download the image from URL
     func downloadImageOf(path: String?, completionHandler: (imageData: NSData?, error: String?) ->  Void) -> NSURLSessionTask? {
-
-        print("\(path)")
         
         if let path = path {
             let url = NSURL(string: path)

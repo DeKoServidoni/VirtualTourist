@@ -39,16 +39,41 @@ class Photo: NSManagedObject {
 
         id = Int(content[FlickrAPI.Flickr.TagId] as? String ?? "") ?? 0
         url = content[FlickrAPI.Flickr.TagUrlM] as? NSString ?? ""
+        
+        if url != "" {
+            imgPath = NSURL(string: url as! String)?.lastPathComponent!
+        }
+    }
+    
+    // MARK: Public functions
+    
+    // delete the photo from the disk of the device
+    func deletePhotoAtDisk() -> Bool {
+        
+        do {
+            let path = getPathWithIdentifier()
+            
+            if let path = path {
+                try NSFileManager.defaultManager().removeItemAtPath(path)
+            }
+            
+            return true
+            
+        } catch {
+            print("\(error)")
+            return false
+        }
+
     }
     
     // MARK: Private functions
     
     // get the image from file
     private func imageWithIdentifier() -> UIImage? {
-        let path = getPath()
+        let path = getPathWithIdentifier()
         
-        if path != nil {
-            if let data = NSData(contentsOfFile: path!) {
+        if let path = path {
+            if let data = NSData(contentsOfFile: path) {
                 return UIImage(data: data)
             }
         }
@@ -58,26 +83,20 @@ class Photo: NSManagedObject {
     
     // save the image in the path
     private func saveImageWithIdentifier(value: UIImage!) {
+        let path = getPathWithIdentifier()
         
-        let path = getPath()
-        
-        if path != nil {
-            imgPath = path
-            
+        if let path = path {
             let data = UIImageJPEGRepresentation(value, 0.0)!
-            data.writeToFile(imgPath! as String, atomically: true)
+            data.writeToFile(path as String, atomically: true)
         }
     }
     
     // get image path
-    private func getPath() -> String? {
-
-        if url != "" {
-            let identifier = NSURL(string: url as! String)?.lastPathComponent!
-            
+    private func getPathWithIdentifier() -> String? {
+        
+        if let path = imgPath {
             let documentsDirectoryURL: NSURL = NSFileManager.defaultManager().URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask).first!
-            
-            return documentsDirectoryURL.URLByAppendingPathComponent(identifier!).path
+            return documentsDirectoryURL.URLByAppendingPathComponent(path as String).path
         }
         
         return nil
