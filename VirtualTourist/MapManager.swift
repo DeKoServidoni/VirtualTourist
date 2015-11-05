@@ -13,8 +13,6 @@ import CoreData
 // Protocol responsible to comunicate with the caller of this manager
 //
 protocol MapManagerDelegate {
-    func operationInsert(coordinate: CLLocationCoordinate2D?)
-    func operationUpdate(coordinate: CLLocationCoordinate2D?, to newCoordinate: CLLocationCoordinate2D?)
     func operationFinishedWithError(andMessage message: String)
     func operationClick(coordinate: CLLocationCoordinate2D?)
 }
@@ -23,15 +21,10 @@ protocol MapManagerDelegate {
 //
 class MapManager: NSObject, MKMapViewDelegate {
     
-    // MARK: Properties
-    
     var mapInfo: MapInfo!
     
     var mapView: MKMapView!
     var sharedContext: NSManagedObjectContext!
-    
-    var dragStartedCoordinate: CLLocationCoordinate2D?
-    var dragStartedAnnotation: MKAnnotationView?
     
     var delegate: MapManagerDelegate?
     
@@ -43,12 +36,6 @@ class MapManager: NSObject, MKMapViewDelegate {
         self.mapView = mapView
         self.sharedContext = sharedContext
         self.delegate = delegate
-        
-        // set the long press on the map
-        let longPress = UILongPressGestureRecognizer(target: self, action: "handleLongPressGesture:")
-        longPress.minimumPressDuration = 1.0;
-        
-        self.mapView.addGestureRecognizer(longPress)
     }
     
     // MARK: Public functions
@@ -57,45 +44,14 @@ class MapManager: NSObject, MKMapViewDelegate {
     func prepareMap() {
         mapInfo = fetchMapInfo()
         
-        if mapInfo != nil {
-            restoreMapRegion(true)
+        if let _ = mapInfo {
+            restoreMapRegion()
         }
     }
     
     // insert the Pin in the Map
     func insertPin(pin: Pin) {
         mapView.addAnnotation(pin)
-    }
-    
-    // delete the Pin in the Map
-    func deletePin(pin: Pin) {
-        mapView.removeAnnotation(pin)
-    }
-    
-    // update the Pin in the Map
-    func updatePin(pin: Pin) {
-        
-        if let annotation = dragStartedAnnotation?.annotation {
-            mapView.removeAnnotation(annotation)
-            mapView.addAnnotation(pin)
-            
-            // clean the temporary annotation
-            dragStartedAnnotation = nil
-        }
-    }
-    
-    // handle the tap and holding action to place the pin
-    func handleLongPressGesture(sender: UIGestureRecognizer) {
-        
-        if sender.state == UIGestureRecognizerState.Began {
-            
-            // convert the touch location to point
-            let touchPoint = sender.locationInView(mapView)
-            let coordinate = mapView.convertPoint(touchPoint, toCoordinateFromView: mapView)
-            
-            // send this annotation to the view controller to be processed
-            delegate?.operationInsert(coordinate)
-        }
     }
     
     // MARK: Private functions
@@ -117,11 +73,15 @@ class MapManager: NSObject, MKMapViewDelegate {
             mapInfo = MapInfo(dictionary: positionDictionary, context: sharedContext)
         }
         
-        saveContextInCoreData()
+        do {
+            try CoreDataStackManager.sharedInstance().saveContext()
+        } catch {
+            delegate?.operationFinishedWithError(andMessage: "Failed to save map current position and zoom!")
+        }
     }
     
     // Restore the map previous region
-    private func restoreMapRegion(animated: Bool) {
+    private func restoreMapRegion() {
 
         let longitude = mapInfo.longitude as CLLocationDegrees
         let latitude = mapInfo.latitude as CLLocationDegrees
@@ -129,22 +89,15 @@ class MapManager: NSObject, MKMapViewDelegate {
         
         let longitudeDelta = mapInfo.longitudeDelta as CLLocationDegrees
         let latitudeDelta = mapInfo.latitudeDelta as CLLocationDegrees
-        let span = MKCoordinateSpan(latitudeDelta: latitudeDelta, longitudeDelta: longitudeDelta)
+        let span = MKCoordinateSpan(latitudeDelta: (latitudeDelta), longitudeDelta: (longitudeDelta))
+        let savedRegion = MKCoordinateRegionMake(center, span)
         
-        let savedRegion = MKCoordinateRegion(center: center, span: span)
-        
-        mapView.setRegion(savedRegion, animated: animated)
-    }
-    
-    // MARK: Core data functions
-    
-    // Save the context and handle the error if it occurrs
-    private func saveContextInCoreData() {
-        do {
-            try CoreDataStackManager.sharedInstance().saveContext()
-        } catch {
-            delegate?.operationFinishedWithError(andMessage: "Failed to save map current position and zoom!")
-        }
+        // we set the region to use the saved zoom
+        // and after that we set the center coordinate, 
+        // with this we can parcially fix the zoom out problem
+        // of map view
+        mapView.setRegion(savedRegion, animated: false)
+        mapView.setCenterCoordinate(center, animated: true)
     }
     
     // Fetch the saved map information (Zoom and Center)
@@ -178,9 +131,8 @@ class MapManager: NSObject, MKMapViewDelegate {
         
         if pinView == nil {
             pinView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: "MapPin")
-            pinView!.canShowCallout = true
+            pinView!.canShowCallout = false
             pinView!.pinTintColor =  UIColor.orangeColor()
-            pinView!.rightCalloutAccessoryView = UIButton(type: .DetailDisclosure)
         }
         else {
             pinView!.annotation = annotation
@@ -191,21 +143,7 @@ class MapManager: NSObject, MKMapViewDelegate {
         return pinView
     }
     
-    func mapView(mapView: MKMapView, annotationView view: MKAnnotationView, didChangeDragState newState: MKAnnotationViewDragState, fromOldState oldState: MKAnnotationViewDragState) {
-    
-            if newState == MKAnnotationViewDragState.Ending || newState == MKAnnotationViewDragState.Canceling {
-                // when the drag is finished or cancelled, we send the started coordinate and the new coordinate
-                // to the core data to update the pin values
-                delegate?.operationUpdate(dragStartedCoordinate, to: view.annotation?.coordinate)
-    
-            } else if newState == MKAnnotationViewDragState.Starting {
-                // first we hold the initial coordinate of the drag pin
-                dragStartedCoordinate = view.annotation?.coordinate
-                dragStartedAnnotation = view
-            }
-    }
-    
-    func mapView(mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
+    func mapView(mapView: MKMapView, didSelectAnnotationView view: MKAnnotationView) {
         mapView.deselectAnnotation(view.annotation, animated: true)
         delegate?.operationClick(view.annotation?.coordinate)
     }

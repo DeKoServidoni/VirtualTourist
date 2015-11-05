@@ -19,10 +19,10 @@ class MapInfo: NSManagedObject {
         static let LongitudeDelta = "longitudeDelta"
     }
     
-    @NSManaged var latitude: NSNumber
-    @NSManaged var longitude: NSNumber
-    @NSManaged var latitudeDelta: NSNumber
-    @NSManaged var longitudeDelta: NSNumber
+    @NSManaged var latitude: Double
+    @NSManaged var longitude: Double
+    @NSManaged var latitudeDelta: Double
+    @NSManaged var longitudeDelta: Double
     
     override init(entity: NSEntityDescription, insertIntoManagedObjectContext context: NSManagedObjectContext?) {
         super.init(entity: entity, insertIntoManagedObjectContext: context)
@@ -37,9 +37,9 @@ class MapInfo: NSManagedObject {
     }
     
     func setValues(dictionary: [String : AnyObject]) {
-        self.latitude = dictionary[Keys.Latitude] as! NSNumber
-        self.longitude = dictionary[Keys.Longitude] as! NSNumber
-        self.latitudeDelta = dictionary[Keys.LatitudeDelta] as! NSNumber
-        self.longitudeDelta = dictionary[Keys.LongitudeDelta] as! NSNumber
+        self.latitude = dictionary[Keys.Latitude] as! Double
+        self.longitude = dictionary[Keys.Longitude] as! Double
+        self.latitudeDelta = dictionary[Keys.LatitudeDelta] as! Double
+        self.longitudeDelta = dictionary[Keys.LongitudeDelta] as! Double
     }
 }

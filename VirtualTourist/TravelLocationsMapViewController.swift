@@ -17,6 +17,21 @@ class TravelLocationsMapViewController: BaseViewController, MapManagerDelegate, 
     
     var mapManager: MapManager!
     
+    var newPin: Pin?
+    
+    // fetched results to get the pins from the core data
+    lazy var fetchedPinResultsController: NSFetchedResultsController = {
+        
+        let fetchRequest = NSFetchRequest(entityName: "Pin")
+        fetchRequest.sortDescriptors = []
+        
+        let fetchedPinResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: self.sharedContext,
+            sectionNameKeyPath: nil,cacheName: nil)
+        
+        return fetchedPinResultsController
+        
+        }()
+    
     // MARK: Application lifecycle
     
     override func viewDidLoad() {
@@ -37,6 +52,10 @@ class TravelLocationsMapViewController: BaseViewController, MapManagerDelegate, 
         }
         
         fetchedPinResultsController.delegate = self
+    }
+    
+    override func viewWillAppear(animated: Bool) {
+        super.viewWillAppear(animated)
         
         // initialize the map with the pins
         let pins = fetchedPinResultsController.fetchedObjects
@@ -44,10 +63,36 @@ class TravelLocationsMapViewController: BaseViewController, MapManagerDelegate, 
         if let array = pins as? [Pin] {
             for item in array {
                 let pin = item as Pin
-                pin.setCoordinateTitle()
                 
                 mapManager.insertPin(pin)
             }
+        }
+    }
+    
+    // MARK: Action functions
+    
+    // handle the touch and hold functionality
+    @IBAction func addPinToMap(sender: UILongPressGestureRecognizer) {
+     
+        let tapPosition:CGPoint = sender.locationInView(self.mapView)
+        let coordinates = mapView.convertPoint(tapPosition, toCoordinateFromView: mapView)
+        
+        switch sender.state {
+        case .Began:
+            newPin = Pin(latitude: coordinates.latitude, longitude: coordinates.longitude, context: sharedContext)
+            break
+            
+        case .Changed:
+            newPin!.coordinate = coordinates
+            break
+            
+        case .Ended:
+            saveContext()
+            break
+            
+        default:
+            // do nothing
+            break
         }
     }
     
@@ -60,11 +105,7 @@ class TravelLocationsMapViewController: BaseViewController, MapManagerDelegate, 
             case .Insert:
                 mapManager.insertPin(anObject as! Pin)
                 break
-                
-            case .Move:
-                mapManager.updatePin(anObject as! Pin)
-                break
-                
+            
             default:
                 // do nothing
                 return
@@ -72,67 +113,6 @@ class TravelLocationsMapViewController: BaseViewController, MapManagerDelegate, 
     }
     
     // MARK: Map manager delegate
-    
-    // insert pin in the core data
-    func operationInsert(coordinate: CLLocationCoordinate2D?) {
-        
-        guard let coordinates = coordinate as CLLocationCoordinate2D! else {
-            showErrorAlert("Invalid coordinates!")
-            return
-        }
-        
-        let pin = Pin(latitude: coordinates.latitude, longitude: coordinates.longitude, context: sharedContext)
-        sharedContext.insertObject(pin)
-        saveContext()
-    }
-    
-    // delete pin of the core data
-    func operationDelete(coordinate: CLLocationCoordinate2D?) {
-        
-        guard let coordinates = coordinate as CLLocationCoordinate2D! else {
-            showErrorAlert("Invalid coordinates!")
-            return
-        }
-        
-        let founded = fetchPinWith(coordinates)
-        
-        if let pin = founded {
-            sharedContext.deleteObject(pin)
-            saveContext()
-        } else {
-            showErrorAlert("Failed to delete pin of the map!")
-        }
-    }
-    
-    // update pin in the core data
-    func operationUpdate(coordinate: CLLocationCoordinate2D?, to newCoordinate: CLLocationCoordinate2D?) {
-        
-        guard let coordinates = coordinate as CLLocationCoordinate2D! else {
-            showErrorAlert("Invalid coordinates!")
-            return
-        }
-        
-        guard let newCoordinates = newCoordinate as CLLocationCoordinate2D! else {
-            showErrorAlert("Invalid coordinates!")
-            return
-        }
-        
-        let founded = fetchPinWith(coordinates)
-        
-        if let pin = founded {
-            
-            // delete all photos from the core data of the previous coordinate
-            cleanPhotosOf(pin)
-            
-            pin.longitude = newCoordinates.longitude
-            pin.latitude = newCoordinates.latitude
-            pin.setCoordinateTitle()
-
-            saveContext()
-        } else {
-            showErrorAlert("Failed to update pin of the map!")
-        }
-    }
     
     // show the album view controller of that pin coordinates
     func operationClick(coordinate: CLLocationCoordinate2D?) {
@@ -151,32 +131,6 @@ class TravelLocationsMapViewController: BaseViewController, MapManagerDelegate, 
     }
     
     // MARK: Private functions
-    
-    // remove all photos from the pin
-    func cleanPhotosOf(pin: Pin) {
-        
-        do {
-            let fetchRequest = NSFetchRequest(entityName: "Photo")
-            fetchRequest.sortDescriptors = [NSSortDescriptor(key: "id", ascending: true)]
-            fetchRequest.predicate = NSPredicate(format: "pin == %@", pin);
-            
-            let photos = try sharedContext.executeFetchRequest(fetchRequest) as! [Photo]
-            
-            for item in photos {
-                
-                let photo = item as Photo
-                photo.deletePhotoAtDisk()
-                
-                sharedContext.deleteObject(photo)
-            }
-            
-            saveContext()
-            
-        } catch {
-            showErrorAlert("Failed to clean photos after move the pin")
-        }
-    }
-
     
     // Get fetch Pin from location 
     private func fetchPinWith(coordinate: CLLocationCoordinate2D) -> Pin? {
@@ -202,17 +156,4 @@ class TravelLocationsMapViewController: BaseViewController, MapManagerDelegate, 
 
         return pin
     }
-    
-    // fetched results to get the pins from the core data
-    lazy var fetchedPinResultsController: NSFetchedResultsController = {
-        
-        let fetchRequest = NSFetchRequest(entityName: "Pin")
-        fetchRequest.sortDescriptors = []
-        
-        let fetchedPinResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: self.sharedContext,
-            sectionNameKeyPath: nil,cacheName: nil)
-        
-        return fetchedPinResultsController
-        
-        }()
 }
