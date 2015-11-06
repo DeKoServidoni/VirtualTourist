@@ -92,6 +92,7 @@ class MapManager: NSObject, MKMapViewDelegate {
         let span = MKCoordinateSpan(latitudeDelta: (latitudeDelta), longitudeDelta: (longitudeDelta))
         let savedRegion = MKCoordinateRegionMake(center, span)
         
+        // 🚨🚨🚨
         // we set the region to use the saved zoom
         // and after that we set the center coordinate, 
         // with this we can parcially fix the zoom out problem

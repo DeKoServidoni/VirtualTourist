@@ -17,6 +17,12 @@ class Pin: NSManagedObject, MKAnnotation {
     @NSManaged var longitude: NSNumber
     @NSManaged var photos: [Photo]
     
+    // responsible to hold the ammount of pages that this pin
+    // contains when search for photos.
+    // It used to get a new set of photos every time the user request 
+    // a new collection
+    @NSManaged var pagesOfPhotos: NSNumber
+    
     private var _coords: CLLocationCoordinate2D?
     var coordinate: CLLocationCoordinate2D {
         
@@ -58,5 +64,7 @@ class Pin: NSManagedObject, MKAnnotation {
         self.longitude = longitude
         
         coordinate = CLLocationCoordinate2DMake(latitude as CLLocationDegrees, longitude as CLLocationDegrees)
+        
+        pagesOfPhotos = 0
     }
 }

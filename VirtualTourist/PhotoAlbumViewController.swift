@@ -61,37 +61,7 @@ class PhotoAlbumViewController: BaseViewController, UICollectionViewDataSource, 
         super.viewWillAppear(animated)
         
         if pin.photos.isEmpty {
-            
-            activityIndicator.startAnimating()
-            
-            FlickrAPI.sharedInstance().findPhotosOf(pin.coordinate) { (result, error) in
-                
-                self.activityIndicator.stopAnimating()
-                self.activityIndicator.hidden = true
-                
-                guard error == nil else {
-                    self.emptyLabel.hidden = false
-                    return
-                }
-                
-                if let response = result as? [[String:AnyObject]] {
-                    
-                    if response.isEmpty {
-                        self.emptyLabel.hidden = false
-                    } else {
-                        
-                        let _ = response.map() { (item: [String : AnyObject]) -> Photo in
-                            let photo = Photo(content: item, context: self.sharedContext)
-                            
-                            photo.pin = self.pin
-                            return photo
-                        }
-                        
-                        self.saveContext()
-                    }
-                }
-            }
-            
+            requestPhotosFromAPI(false)
         } else {
             collectionView.hidden = false
             activityIndicator.hidden = true
@@ -116,8 +86,21 @@ class PhotoAlbumViewController: BaseViewController, UICollectionViewDataSource, 
     // MARK: IBAction functions
     
     @IBAction func newCollectionActionClick(sender: UIBarButtonItem) {
-        print("RELOAD COLLECTION!")
-        //TODO: RELOAD THE COLLECTION <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+        
+        // let's delete all photos from the core data and disk
+        let photosToDelete = fetchedPhotosResultsController.fetchedObjects
+        
+        for item in photosToDelete! {
+            let photo = item as! Photo
+            
+            photo.deletePhotoAtDisk()
+            sharedContext.deleteObject(photo)
+        }
+        
+        saveContext()
+        
+        // request a new sorted set of photos
+        requestPhotosFromAPI(true)
     }
     
     // MARK: Fetched results functions
@@ -248,5 +231,41 @@ class PhotoAlbumViewController: BaseViewController, UICollectionViewDataSource, 
         mapView.userInteractionEnabled = false;
         mapView.setRegion(centeredRegion, animated: true)
         mapView.addAnnotation(pin)
+    }
+    
+    // call the flickr API and request a new set of photos that
+    // corresponds to PIN coordinate
+    private func requestPhotosFromAPI(sorted: Bool) {
+        
+        activityIndicator.startAnimating()
+        
+        FlickrAPI.sharedInstance().findPhotosOf(pin.coordinate, inPages: Int(pin.pagesOfPhotos)) { (photos, pages, error) in
+            
+            self.activityIndicator.stopAnimating()
+            self.activityIndicator.hidden = true
+            
+            guard error == nil else {
+                self.emptyLabel.hidden = false
+                return
+            }
+            
+            if let response = photos as? [[String:AnyObject]] {
+                
+                if response.isEmpty {
+                    self.emptyLabel.hidden = false
+                } else {
+                    
+                    let _ = response.map() { (item: [String : AnyObject]) -> Photo in
+                        let photo = Photo(content: item, context: self.sharedContext)
+                        
+                        photo.pin = self.pin
+                        return photo
+                    }
+                    
+                    self.pin.pagesOfPhotos = pages
+                    self.saveContext()
+                }
+            }
+        }
     }
 }

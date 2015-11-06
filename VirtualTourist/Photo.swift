@@ -37,8 +37,8 @@ class Photo: NSManagedObject {
         let entity = NSEntityDescription.entityForName("Photo", inManagedObjectContext: context)
         super.init(entity: entity!, insertIntoManagedObjectContext: context)
 
-        id = Int(content[FlickrAPI.Flickr.TagId] as? String ?? "") ?? 0
-        url = content[FlickrAPI.Flickr.TagUrlM] as? NSString ?? ""
+        id = Int(content[FlickrAPI.FlickrJSON.TagId] as? String ?? "") ?? 0
+        url = content[FlickrAPI.FlickrJSON.TagUrlM] as? NSString ?? ""
         
         if url != "" {
             imgPath = NSURL(string: url as! String)?.lastPathComponent!
