@@ -208,7 +208,6 @@ class PhotoAlbumViewController: BaseViewController, UICollectionViewDataSource, 
     
     func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
         let photo = fetchedPhotosResultsController.objectAtIndexPath(indexPath) as! Photo
-        
         sharedContext.deleteObject(photo)
         saveContext()
     }

@@ -21,7 +21,7 @@ class Photo: NSManagedObject {
     var photoImage: UIImage? {
         
         get {
-            return imageWithIdentifier()
+            return loadImageWithIdentifier()
         }
         
         set {
@@ -74,7 +74,7 @@ class Photo: NSManagedObject {
     // MARK: Private functions
     
     // get the image from file
-    private func imageWithIdentifier() -> UIImage? {
+    private func loadImageWithIdentifier() -> UIImage? {
         let path = getPathWithIdentifier()
         
         if let path = path {
