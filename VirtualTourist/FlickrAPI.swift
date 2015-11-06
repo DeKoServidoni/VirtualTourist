@@ -42,6 +42,9 @@ class FlickrAPI: NSObject {
         let page = sortPage() as Int
         let uploadDate = dateRange() as [Double]
         
+        print("page: \(page) - totalPages: \(totalPages)") ///<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+        
         let methodArguments = [
             FlickrParamValue.ParamMethod: FlickrParamValue.ValueMethod,
             FlickrParamValue.ParamApiKey: FlickrParamValue.ValueApiKey,

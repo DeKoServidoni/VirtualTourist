@@ -45,8 +45,6 @@ class PhotoAlbumViewController: BaseViewController, UICollectionViewDataSource, 
         
         initializeMap()
         
-        self.collectionView.hidden = false
-        
         // load saved pins
         do {
             try fetchedPhotosResultsController.performFetch()
@@ -61,10 +59,9 @@ class PhotoAlbumViewController: BaseViewController, UICollectionViewDataSource, 
         super.viewWillAppear(animated)
         
         if pin.photos.isEmpty {
-            requestPhotosFromAPI(false)
+            requestPhotosFromAPI()
         } else {
-            collectionView.hidden = false
-            activityIndicator.hidden = true
+            endLoading(true)
         }
     }
     
@@ -92,15 +89,13 @@ class PhotoAlbumViewController: BaseViewController, UICollectionViewDataSource, 
         
         for item in photosToDelete! {
             let photo = item as! Photo
-            
-            photo.deletePhotoAtDisk()
             sharedContext.deleteObject(photo)
         }
-        
+
         saveContext()
         
         // request a new sorted set of photos
-        requestPhotosFromAPI(true)
+        requestPhotosFromAPI()
     }
     
     // MARK: Fetched results functions
@@ -173,6 +168,7 @@ class PhotoAlbumViewController: BaseViewController, UICollectionViewDataSource, 
         let photo = fetchedPhotosResultsController.objectAtIndexPath(indexPath) as! Photo
         
         let cell = collectionView.dequeueReusableCellWithReuseIdentifier("PhotoCellView", forIndexPath: indexPath) as! PhotoCell
+        cell.photo.image = UIImage(named: "placeholder")
         
         if photo.url == "" {
             cell.photo.image = UIImage(named: "noImage")
@@ -235,24 +231,25 @@ class PhotoAlbumViewController: BaseViewController, UICollectionViewDataSource, 
     
     // call the flickr API and request a new set of photos that
     // corresponds to PIN coordinate
-    private func requestPhotosFromAPI(sorted: Bool) {
+    private func requestPhotosFromAPI() {
         
-        activityIndicator.startAnimating()
+        startLoading()
         
         FlickrAPI.sharedInstance().findPhotosOf(pin.coordinate, inPages: Int(pin.pagesOfPhotos)) { (photos, pages, error) in
             
-            self.activityIndicator.stopAnimating()
-            self.activityIndicator.hidden = true
-            
             guard error == nil else {
-                self.emptyLabel.hidden = false
+                dispatch_async(dispatch_get_main_queue()) {
+                    self.endLoading(false)
+                }
                 return
             }
             
             if let response = photos as? [[String:AnyObject]] {
                 
                 if response.isEmpty {
-                    self.emptyLabel.hidden = false
+                    dispatch_async(dispatch_get_main_queue()) {
+                        self.endLoading(false)
+                    }
                 } else {
                     
                     let _ = response.map() { (item: [String : AnyObject]) -> Photo in
@@ -264,8 +261,40 @@ class PhotoAlbumViewController: BaseViewController, UICollectionViewDataSource, 
                     
                     self.pin.pagesOfPhotos = pages
                     self.saveContext()
+                    
+                    dispatch_async(dispatch_get_main_queue()) {
+                        self.endLoading(true)
+                    }
                 }
             }
         }
+    }
+    
+    // Refresh the UI when the loading start
+    private func startLoading() {
+        
+        newCollection.enabled = false
+        activityIndicator.hidden = false
+        collectionView.hidden = true
+        
+        activityIndicator.startAnimating()
+    }
+    
+    // Refresh the UI when the loading end
+    private func endLoading(success: Bool) {
+        
+        activityIndicator.stopAnimating()
+        activityIndicator.hidden = true
+        
+        if success {
+            collectionView.hidden = false
+            activityIndicator.hidden = true
+            newCollection.enabled = true
+            
+        } else {
+            emptyLabel.hidden = false
+            newCollection.enabled = true
+        }
+        
     }
 }
