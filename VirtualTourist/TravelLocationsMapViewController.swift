@@ -37,6 +37,8 @@ class TravelLocationsMapViewController: BaseViewController, MapManagerDelegate, 
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.Trash, target: self, action: "cleanPins")
+        
         // load map information (zoom and center)
         mapManager = MapManager(mapView: mapView, sharedContext: sharedContext, delegate: self)
         mapManager.prepareMap()
@@ -71,6 +73,18 @@ class TravelLocationsMapViewController: BaseViewController, MapManagerDelegate, 
     
     // MARK: Action functions
     
+    // remove all pins from the map view
+    func cleanPins() {
+        
+        let pins = fetchedPinResultsController.fetchedObjects as! [Pin]
+        for item in pins {
+            let pin = item as Pin
+            sharedContext.deleteObject(pin)
+        }
+        
+        saveContext()
+    }
+    
     // handle the touch and hold functionality
     @IBAction func addPinToMap(sender: UILongPressGestureRecognizer) {
      
@@ -104,6 +118,10 @@ class TravelLocationsMapViewController: BaseViewController, MapManagerDelegate, 
             
             case .Insert:
                 mapManager.insertPin(anObject as! Pin)
+                break
+            
+            case .Delete:
+                mapManager.removePin(anObject as! Pin)
                 break
             
             default:

@@ -54,6 +54,11 @@ class MapManager: NSObject, MKMapViewDelegate {
         mapView.addAnnotation(pin)
     }
     
+    // remove the Pin from the Map
+    func removePin(pin: Pin) {
+        mapView.removeAnnotation(pin)
+    }
+    
     // MARK: Private functions
     
     // Save the region of the map every time it's update
