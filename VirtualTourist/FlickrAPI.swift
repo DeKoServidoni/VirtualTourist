@@ -40,10 +40,7 @@ class FlickrAPI: NSObject {
         totalPages = pages
         
         let page = sortPage() as Int
-        let uploadDate = dateRange() as [Double]
-        
-        print("page: \(page) - totalPages: \(totalPages)") ///<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
+        let uploadDate = dateRange() as [Int64]
         
         let methodArguments = [
             FlickrParamValue.ParamMethod: FlickrParamValue.ValueMethod,
@@ -64,8 +61,6 @@ class FlickrAPI: NSObject {
         let urlString = "https://api.flickr.com/services/rest/" + formatParameters(methodArguments)
         let url = NSURL(string: urlString)
         let request = NSURLRequest(URL: url!)
-        
-        print("\(urlString)") ///<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
         
         sharedSession.dataTaskWithRequest(request) { (data, result, error) in
         
@@ -171,22 +166,21 @@ class FlickrAPI: NSObject {
         return randomPage
     }
     
-    // 🚨🚨🚨
     // calculate the max and min upload range (1 year)
     // I generate the 2 parameters of the request: "min_upload_date" and "max_upload_date"
     // The flicker API return a maximum of 4000 photos. If the API return a higher number, the
     // pages parameter came wrong, so to try to limit the return quantity to 4000 I set a range
     // of 1 year to filter the request
     // More info at: 👉🏼http://stackoverflow.com/questions/1994037/flickr-api-returning-duplicate-photos
-    private func dateRange() -> [Double] {
+    private func dateRange() -> [Int64] {
         
-        var range = [Double]()
+        var range = [Int64]()
         
         let startedTime = NSDate().minUpdateDate().timeIntervalSince1970
-        let currentTimme = NSDate().timeIntervalSince1970
+        let currentTime = NSDate().timeIntervalSince1970
         
-        range.append(Double(currentTimme))
-        range.append(Double(startedTime))
+        range.append(Int64(currentTime))
+        range.append(Int64(startedTime))
         
         return range
     }
@@ -212,6 +206,6 @@ class FlickrAPI: NSObject {
 // Date extension
 extension NSDate {
     func minUpdateDate() -> NSDate {
-        return NSCalendar.currentCalendar().dateByAddingUnit(NSCalendarUnit.Year, value: -1, toDate: self, options: NSCalendarOptions())!
+        return NSCalendar.currentCalendar().dateByAddingUnit(NSCalendarUnit.Month, value: -8, toDate: self, options: NSCalendarOptions())!
     }
 }

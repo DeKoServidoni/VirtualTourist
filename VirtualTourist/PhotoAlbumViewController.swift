@@ -91,7 +91,7 @@ class PhotoAlbumViewController: BaseViewController, UICollectionViewDataSource, 
             let photo = item as! Photo
             sharedContext.deleteObject(photo)
         }
-
+        
         saveContext()
         
         // request a new sorted set of photos

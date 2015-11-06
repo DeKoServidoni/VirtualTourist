@@ -54,7 +54,12 @@ class Photo: NSManagedObject {
             let path = getPathWithIdentifier()
             
             if let path = path {
-                try NSFileManager.defaultManager().removeItemAtPath(path)
+                
+                let fileManager = NSFileManager.defaultManager()
+                
+                if fileManager.fileExistsAtPath(path) {
+                    try fileManager.removeItemAtPath(path)
+                }
             }
             
             return true
